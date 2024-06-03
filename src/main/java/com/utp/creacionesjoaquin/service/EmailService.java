@@ -42,7 +42,7 @@ public class EmailService {
 
                 Map<String, Object> model = new HashMap<>();
                 model.put("username", userUpdate.getPersonalInformation().getFirstName());
-                model.put("url", "http://localhost:3000/auth/change-password/confirm/" + token);
+                model.put("url", "https://creaciones-joaquin-front.vercel.app/auth/change-password/confirm/" + token);
                 context.setVariables( model );
 
                 String htmlText =  templateEngine.process("email_template", context);
