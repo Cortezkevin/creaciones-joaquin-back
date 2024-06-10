@@ -42,6 +42,8 @@ public class EmailService {
 
                 Map<String, Object> model = new HashMap<>();
                 model.put("username", userUpdate.getPersonalInformation().getFirstName());
+                /* https://creaciones-joaquin-front.vercel.app/ */
+                /* http://localhost:3000/ */
                 model.put("url", "https://creaciones-joaquin-front.vercel.app/auth/change-password/confirm/" + token);
                 context.setVariables( model );
 

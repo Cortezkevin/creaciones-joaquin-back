@@ -17,12 +17,7 @@ public class Invoice {
     @GeneratedValue( strategy = GenerationType.UUID)
     private String id;
     private LocalDate issuedDate;
-    private BigDecimal discount;
-    private BigDecimal tax;
-    private BigDecimal subtotal;
-    private BigDecimal total;
-    @Enumerated( EnumType.STRING )
-    private PaymentMethod paymentMethod;
+    private String url;
     @OneToOne(fetch = FetchType.EAGER)
     private Order order;
 }

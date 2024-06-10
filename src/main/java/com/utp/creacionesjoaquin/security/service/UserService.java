@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.security.service;
 
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
 import com.utp.creacionesjoaquin.exception.customException.ResourceDuplicatedException;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import com.utp.creacionesjoaquin.model.*;
@@ -68,6 +69,20 @@ public class UserService {
     @Autowired
     private ProductRepository productRepository;
 
+    public ResponseWrapperDTO<List<UserDTO>> findAllUsers(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MainUser mainUser = (MainUser) authentication.getPrincipal();
+        List<UserDTO> userDTOList = repository.findAll().stream()
+                .filter(u -> !u.getEmail().equals(mainUser.getEmail()))
+                .map(UserDTO::parseToDTO).toList();
+        return ResponseWrapperDTO.<List<UserDTO>>builder()
+                .success(true)
+                .message("Solicitud satisfactoria")
+                .status(HttpStatus.OK.name())
+                .content( userDTOList )
+                .build();
+    }
+
     @SneakyThrows
     public User getByUsername(String username ) {
         User user = repository.findByEmail( username ).orElse(null);
@@ -80,6 +95,8 @@ public class UserService {
     public ResponseWrapperDTO<String> createRoles(){
         roleRepository.save(Role.builder().rolName(RolName.ROLE_USER).build());
         roleRepository.save(Role.builder().rolName(RolName.ROLE_ADMIN).build());
+        roleRepository.save(Role.builder().rolName(RolName.ROLE_TRANSPORT).build());
+        roleRepository.save(Role.builder().rolName(RolName.ROLE_WAREHOUSE).build());
         return ResponseWrapperDTO.<String>builder()
                 .message("Roles registrados")
                 .content("Roles registrados en la base de datos")
@@ -93,7 +110,6 @@ public class UserService {
     public ResponseWrapperDTO<UserDTO> getUserFromToken(String token ){
         String username = jwtProvider.getUsernameFromToken( token );
         User user = repository.findByEmail( username ).orElseThrow( () -> new ResourceNotFoundException("User not found with username: " + username)) ;
-
         return ResponseWrapperDTO.<UserDTO>builder()
                 .message("Success Request")
                 .status(HttpStatus.OK.name())
@@ -205,7 +221,6 @@ public class UserService {
                     .build();
 
             if(newUserDTO.memoryAddress() != null){
-                System.out.println("MEMORY ADDRESS PRESENT");
                 newAddress.setFullAddress( newUserDTO.memoryAddress().fullAddress() );
                 newAddress.setProvince( newUserDTO.memoryAddress().province() );
                 newAddress.setDistrict( newUserDTO.memoryAddress().district() );
@@ -279,6 +294,46 @@ public class UserService {
             }
         }catch (ResourceNotFoundException e){
             return ResponseWrapperDTO.<String>builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .success( false )
+                    .content( null )
+                    .build();
+        }
+    }
+
+    public ResponseWrapperDTO<UserDTO> update(UpdateUserDTO updateUserDTO) {
+        try {
+            User user = repository.findById( updateUserDTO.userId() ).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            user.setEmail( updateUserDTO.email() );
+
+            PersonalInformation personalInformation = personalInformationRepository.findByUser( user ).orElse(null);
+            if( personalInformation != null ){
+                personalInformation.setFirstName(updateUserDTO.firstName());
+                personalInformation.setLastName(updateUserDTO.lastName());
+                PersonalInformation personalInformationUpdated = personalInformationRepository.save(personalInformation);
+                user.setPersonalInformation( personalInformationUpdated );
+            }
+
+            Set<Role> roles = new HashSet<>();
+
+            for(String r: updateUserDTO.roles()){
+                Role roleUser = roleRepository.findByRolName( RolName.valueOf( r ) ).orElseThrow(() -> new ResourceNotFoundException("El rol: " + r + " no existe"));
+                roles.add( roleUser );
+            }
+
+            user.setRoles( roles );
+
+            User userUpdated = repository.save( user );
+
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message("Se actualizo el usuario")
+                    .status(HttpStatus.OK.name())
+                    .success( true )
+                    .content(UserDTO.parseToDTO(userUpdated))
+                    .build();
+        }catch (ResourceNotFoundException e){
+            return ResponseWrapperDTO.<UserDTO>builder()
                     .message(e.getMessage())
                     .status(HttpStatus.BAD_REQUEST.name())
                     .success( false )

@@ -25,4 +25,7 @@ public class PersonalInformation {
     @OneToOne(fetch = FetchType.EAGER)
     private Address address;
 
+    public String getFullName() {
+        return this.firstName + " " + this.getLastName();
+    }
 }

@@ -21,4 +21,6 @@ public class OrderDetail {
     private BigDecimal total;
     @ManyToOne(fetch = FetchType.EAGER)
     private Order order;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Product product;
 }

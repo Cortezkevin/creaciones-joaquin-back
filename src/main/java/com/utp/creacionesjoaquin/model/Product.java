@@ -28,4 +28,6 @@ public class Product {
     private List<ProductImages> productImagesList = new ArrayList<>();
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<CartItem> cartItems = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private List<OrderDetail> orderDetails = new ArrayList<>();
 }

@@ -93,4 +93,25 @@ public class AddressService {
         }
     }
 
+    public ResponseWrapperDTO<AddressDTO> getAddressFromUser(String userId) {
+        try {
+            User user = userRepository.findById( userId ).orElseThrow(() -> new ResourceNotFoundException(("Usuario no encontrado")));
+            PersonalInformation personalInformation = personalInformationRepository.findByUser( user ).orElseThrow(() -> new ResourceNotFoundException(("Informacion no encontrada")));
+            Address address = addressRepository.findByPersonalInformation( personalInformation ).orElseThrow(() -> new ResourceNotFoundException(("Direccion no encontrada")));
+
+            return ResponseWrapperDTO.<AddressDTO>builder()
+                    .message("Solicitud satisfactoria")
+                    .success(true)
+                    .status(HttpStatus.OK.name())
+                    .content(AddressDTO.parseToDTO( address ))
+                    .build();
+        }catch (ResourceNotFoundException e){
+            return ResponseWrapperDTO.<AddressDTO>builder()
+                    .success(false)
+                    .content( null )
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .message("Ocurrio un error: " + e.getMessage())
+                    .build();
+        }
+    }
 }

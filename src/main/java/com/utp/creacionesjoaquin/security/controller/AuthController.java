@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin
@@ -19,6 +21,7 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
+
 
     @GetMapping("/getUserFromToken")
     public ResponseEntity<ResponseWrapperDTO<UserDTO>> getUserFromToken(@RequestHeader(name = "Authorization") String tokenHeader){

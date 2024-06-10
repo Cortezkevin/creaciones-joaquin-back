@@ -38,6 +38,13 @@ public class CartController {
         return ResponseEntity.ok(cartService.removeItemToCart( removeItemDTO ));
     }
 
+    @PostMapping("/clear")
+    public ResponseEntity<ResponseWrapperDTO<CartDTO>> clearCart(
+            @RequestParam("cart") String cart
+    ){
+        return ResponseEntity.ok(cartService.clearCart( cart ));
+    }
+
     @PutMapping("/shipping")
     public ResponseEntity<ResponseWrapperDTO<CartDTO>> updateShippingCost(
             @RequestBody UpdateShippingCostDTO updateShippingCostDTO

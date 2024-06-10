@@ -68,6 +68,8 @@ public class CloudinaryService {
                     "public_id", publicId
             );
             Map res = cloudinary.uploader().upload( uploadDTO.file(), params);
+            System.out.println(res.get("secure_url"));
+            System.out.println(res.toString());
             return new UploadResultDTO(publicId, res.get("secure_url").toString());
         }catch (IOException ex){
             log.error( ex.getMessage() );

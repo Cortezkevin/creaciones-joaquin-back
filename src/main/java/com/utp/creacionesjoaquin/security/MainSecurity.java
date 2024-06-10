@@ -60,7 +60,9 @@ public class MainSecurity {
         http.authenticationProvider( authenticationProvider() );
 
         return http.authorizeHttpRequests( registry -> {
-            registry.requestMatchers(HttpMethod.POST).permitAll();registry.requestMatchers("/api/category/public/**").permitAll();
+            registry.requestMatchers(HttpMethod.POST).permitAll();
+            registry.requestMatchers(HttpMethod.GET).permitAll();
+            registry.requestMatchers("/api/category/public/**").permitAll();
             registry.requestMatchers("/api/product/public/**").permitAll();
             registry.requestMatchers("/api/category/public/**").permitAll();
             registry.requestMatchers("/api/sub-category/public/**").permitAll();
