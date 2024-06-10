@@ -8,6 +8,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,6 +23,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
+
+    @Value("${front.url}")
+    private String FRONT_PATH;
 
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
@@ -44,7 +48,7 @@ public class EmailService {
                 model.put("username", userUpdate.getPersonalInformation().getFirstName());
                 /* https://creaciones-joaquin-front.vercel.app/ */
                 /* http://localhost:3000/ */
-                model.put("url", "https://creaciones-joaquin-front.vercel.app/auth/change-password/confirm/" + token);
+                model.put("url", FRONT_PATH + "/auth/change-password/confirm/" + token);
                 context.setVariables( model );
 
                 String htmlText =  templateEngine.process("email_template", context);

@@ -232,4 +232,36 @@ public class CartService {
         }
     }
 
+    public ResponseWrapperDTO<CartDTO> clearCartByUser(String userId){
+        try {
+            User user = userRepository.findByEmail(userId).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
+            cart.setTotal(cart.getShippingCost());
+            cart.setTax(BigDecimal.ZERO);
+            cart.setDiscount(BigDecimal.ZERO);
+            cart.setSubtotal(BigDecimal.ZERO);
+
+            cartRepository.save( cart );
+
+            cart.getCartItems().forEach(cartItemRepository::delete);
+
+            Cart cartUpdated = cartRepository.findById( cart.getId() ).get();
+            cartUpdated.setCartItems(new ArrayList<>());
+            return ResponseWrapperDTO.<CartDTO>builder()
+                    .message("Carrito limpiado")
+                    .success(true)
+                    .status(HttpStatus.OK.name())
+                    .content( CartDTO.fromEntity(cartUpdated) )
+                    .build();
+        }catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+            return ResponseWrapperDTO.<CartDTO>builder()
+                    .message("Ocurrio un error al limpiar el carrito")
+                    .success(false)
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .content(null)
+                    .build();
+        }
+    }
+
 }

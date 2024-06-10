@@ -23,10 +23,12 @@ import com.utp.creacionesjoaquin.repository.OrderRepository;
 import com.utp.creacionesjoaquin.security.model.User;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 import org.hibernate.validator.constraints.Email;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -94,6 +97,7 @@ public class PaymentService {
 
             orderRepository.save(orderCreated);
 
+            log.info("CALL GENERATE UPLOAD PDF");
             String invoicePDFUrl = generateAndUploadInvoicePDF( orderCreated.getId() );
 
             Invoice newInvoice = Invoice.builder()
@@ -166,8 +170,12 @@ public class PaymentService {
     public String generateAndUploadInvoicePDF(String orderId){
         try {
             Order order = orderRepository.findById( orderId ).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
-            File file = ResourceUtils.getFile("classpath:orderInvoice.jasper");
-            File imgLogo = ResourceUtils.getFile("classpath:static/LOGO.jpeg");
+            ClassPathResource jasperResource = new ClassPathResource("/orderInvoice.jasper");
+            ClassPathResource logoResource = new ClassPathResource("/static/LOGO.jpeg");
+            log.info("LOADING CLASSPATH FILES");
+            File file = jasperResource.getFile(); // ResourceUtils.getFile( jasperResource.getURL() );//ResourceUtils.getFile("classpath:orderInvoice.jasper");
+            File imgLogo = logoResource.getFile();//ResourceUtils.getFile("classpath:static/LOGO.jpeg");
+            log.info("CLASSPATH FILES loaded");
             JasperReport report = ( JasperReport ) JRLoader.loadObject(file);
 
             HashMap<String,Object> params = new HashMap<>();
@@ -188,13 +196,14 @@ public class PaymentService {
             JasperExportManager.exportReportToPdfStream( jasperPrint, new FileOutputStream(tempPDFFile));
 
             UploadResultDTO uploadResultDTO = cloudinaryService.upload("pdf/"+order.getUser().getId(), new UploadDTO(tempPDFFile,"invoice_"+order.getId()));
-            System.out.println("UPLOAD DTO " + uploadResultDTO.url());
+            log.info("UPLOAD DTO " + uploadResultDTO.url());
             return uploadResultDTO.url();
 
         }catch (ResourceNotFoundException e){
             e.printStackTrace();
             return null;
         } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
             return null;
         } catch (JRException e) {
