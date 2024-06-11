@@ -187,13 +187,14 @@ public class PaymentService {
             params.put("ds",new JRBeanCollectionDataSource(order.getOrderDetails()));
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(report, params, new JREmptyDataSource());
+            byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
 
-            Path tempPDFPath = Files.createTempFile("invoice_"+order.getId(), ".pdf");
-            File tempPDFFile = tempPDFPath.toFile();
+            /*Path tempPDFPath = Files.createTempFile("invoice_"+order.getId(), ".pdf");
+            File tempPDFFile = tempPDFPath.toFile();*/
 
-            JasperExportManager.exportReportToPdfStream( jasperPrint, new FileOutputStream(tempPDFFile));
+            /*JasperExportManager.exportReportToPdfStream( jasperPrint, new FileOutputStream(tempPDFFile));*/
 
-            UploadResultDTO uploadResultDTO = cloudinaryService.upload("pdf/"+order.getUser().getId(), new UploadDTO(tempPDFFile,"invoice_"+order.getId()));
+            UploadResultDTO uploadResultDTO = cloudinaryService.upload("pdf/"+order.getUser().getId(), new UploadDTO(null, new ByteArrayInputStream(pdfBytes), "invoice_"+order.getId()));
             log.info("UPLOAD DTO " + uploadResultDTO.url());
             return uploadResultDTO.url();
 
