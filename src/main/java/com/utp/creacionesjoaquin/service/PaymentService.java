@@ -171,13 +171,13 @@ public class PaymentService {
             Resource jasperResource = resourceLoader.getResource("classpath:orderInvoice.jasper");
             Resource logoResource = resourceLoader.getResource("classpath:static/LOGO.jpeg");
             log.info("LOADING CLASSPATH FILES");
-            File file = jasperResource.getFile(); // ResourceUtils.getFile( jasperResource.getURL() );//ResourceUtils.getFile("classpath:orderInvoice.jasper");
-            File imgLogo = logoResource.getFile();//ResourceUtils.getFile("classpath:static/LOGO.jpeg");
+            InputStream jasperInputStream  = jasperResource.getInputStream();
+            InputStream logoInputStream  = logoResource.getInputStream();
             log.info("CLASSPATH FILES loaded");
-            JasperReport report = ( JasperReport ) JRLoader.loadObject(file);
+            JasperReport report = ( JasperReport ) JRLoader.loadObject(jasperInputStream);
 
             HashMap<String,Object> params = new HashMap<>();
-            params.put("logoEmpresa", new FileInputStream( imgLogo ));
+            params.put("logoEmpresa", logoInputStream );
             params.put("fullName",order.getUser().getPersonalInformation().getFullName());
             params.put("subtotal",order.getSubtotal());
             params.put("delivery",order.getShippingCost());
