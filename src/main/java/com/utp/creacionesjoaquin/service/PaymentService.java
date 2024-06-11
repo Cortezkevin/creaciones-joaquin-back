@@ -27,19 +27,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
-import org.hibernate.validator.constraints.Email;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +51,7 @@ public class PaymentService {
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final ResourceLoader resourceLoader;
 
     public ResponseWrapperDTO<String> successPayment(String userId){
         try {
@@ -170,8 +168,8 @@ public class PaymentService {
     public String generateAndUploadInvoicePDF(String orderId){
         try {
             Order order = orderRepository.findById( orderId ).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
-            ClassPathResource jasperResource = new ClassPathResource("/orderInvoice.jasper");
-            ClassPathResource logoResource = new ClassPathResource("/static/LOGO.jpeg");
+            Resource jasperResource = resourceLoader.getResource("/orderInvoice.jasper");
+            Resource logoResource = resourceLoader.getResource("/static/LOGO.jpeg");
             log.info("LOADING CLASSPATH FILES");
             File file = jasperResource.getFile(); // ResourceUtils.getFile( jasperResource.getURL() );//ResourceUtils.getFile("classpath:orderInvoice.jasper");
             File imgLogo = logoResource.getFile();//ResourceUtils.getFile("classpath:static/LOGO.jpeg");
