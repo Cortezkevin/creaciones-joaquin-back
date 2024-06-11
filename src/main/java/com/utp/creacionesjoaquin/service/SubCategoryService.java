@@ -46,7 +46,7 @@ public class SubCategoryService {
 
     public ResponseWrapperDTO<SubCategoryDTO> create(NewSubCategoryDTO newSubCategoryDTO, File file){
         String id = UUID.randomUUID().toString();
-        UploadDTO uploadDTO = new UploadDTO( file, id );
+        UploadDTO uploadDTO = new UploadDTO( file, null, id );
         UploadResultDTO uploadResultDTO = cloudinaryService.upload( "sub_category", uploadDTO );
         if( uploadResultDTO != null){
             Category category = categoryRepository.findById(newSubCategoryDTO.category_id()).orElseThrow(() -> new RuntimeException("ERROR: CATEGORY NOT FOUNDED"));
@@ -73,7 +73,7 @@ public class SubCategoryService {
         try {
             SubCategory subCategory = subCategoryRepository.findById( updateSubCategoryDTO.id() ).orElseThrow(() -> new ResourceNotFoundException("Sub Categoria no encontrada"));
             if( file != null ){
-                UploadDTO uploadDTO = new UploadDTO( file, subCategory.getId() );
+                UploadDTO uploadDTO = new UploadDTO( file, null, subCategory.getId() );
                 boolean imageDeleted = cloudinaryService.delete("sub_category"+"/"+ UploadUtils.formatFileName(subCategory.getName()));
                 if( imageDeleted ){
                     UploadResultDTO uploadResultDTO = cloudinaryService.upload("sub_category", uploadDTO);

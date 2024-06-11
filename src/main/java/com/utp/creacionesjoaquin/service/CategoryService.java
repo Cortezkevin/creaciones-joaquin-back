@@ -47,7 +47,7 @@ public class CategoryService {
 
     public ResponseWrapperDTO<CategoryDTO> create(String name, File file){
         String id = UUID.randomUUID().toString();
-        UploadDTO uploadDTO = new UploadDTO(file, id);
+        UploadDTO uploadDTO = new UploadDTO(file,null, id);
         UploadResultDTO uploadResultDTO = cloudinaryService.upload( "category", uploadDTO );
         if( uploadResultDTO != null ){
             Category newCategory = Category.builder()
@@ -70,7 +70,7 @@ public class CategoryService {
         try{
             Category category = categoryRepository.findById( updateCategoryDTO.id() ).orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
             if( file != null ){
-                UploadDTO uploadDTO = new UploadDTO(file, category.getId());
+                UploadDTO uploadDTO = new UploadDTO(file, null, category.getId());
                 boolean imageDeleted = cloudinaryService.delete("category"+"/"+UploadUtils.formatFileName(category.getName()));
                 if( imageDeleted ){
                     UploadResultDTO uploadResultDTO = cloudinaryService.upload("category", uploadDTO);

@@ -42,7 +42,7 @@ public class ProductImagesService {
         try {
             Product product = productRepository.findById( productId ).orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
             long productImagesCount = productImagesRepository.countByProduct(product);
-            UploadDTO uploadDTO = new UploadDTO(file, product.getId() + "_" + (productImagesCount + 1));
+            UploadDTO uploadDTO = new UploadDTO(file,null, product.getId() + "_" + (productImagesCount + 1));
             UploadResultDTO uploadResultDTO = cloudinaryService.upload("product", uploadDTO);
             if( uploadResultDTO != null ){
                 ProductImages newProductImage = ProductImages.builder()
@@ -78,7 +78,7 @@ public class ProductImagesService {
     public ResponseWrapperDTO<ProductImageDTO> update(String productImageId, File file){
         try {
             ProductImages productImage = productImagesRepository.findById( productImageId ).orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada"));
-            UploadDTO uploadDTO = new UploadDTO(file, productImage.getImage_id().replace("product/",""));
+            UploadDTO uploadDTO = new UploadDTO(file,null, productImage.getImage_id().replace("product/",""));
 
             boolean result = cloudinaryService.delete( productImage.getImage_id() );
             if( result ){
