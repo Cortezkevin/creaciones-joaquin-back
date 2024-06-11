@@ -168,8 +168,8 @@ public class PaymentService {
     public String generateAndUploadInvoicePDF(String orderId){
         try {
             Order order = orderRepository.findById( orderId ).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
-            Resource jasperResource = resourceLoader.getResource("/orderInvoice.jasper");
-            Resource logoResource = resourceLoader.getResource("/static/LOGO.jpeg");
+            Resource jasperResource = resourceLoader.getResource("classpath:orderInvoice.jasper");
+            Resource logoResource = resourceLoader.getResource("classpath:static/LOGO.jpeg");
             log.info("LOADING CLASSPATH FILES");
             File file = jasperResource.getFile(); // ResourceUtils.getFile( jasperResource.getURL() );//ResourceUtils.getFile("classpath:orderInvoice.jasper");
             File imgLogo = logoResource.getFile();//ResourceUtils.getFile("classpath:static/LOGO.jpeg");
