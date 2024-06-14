@@ -2,13 +2,12 @@ package com.utp.creacionesjoaquin.model;
 
 import com.utp.creacionesjoaquin.enums.OrderStatus;
 import com.utp.creacionesjoaquin.enums.PaymentMethod;
-import com.utp.creacionesjoaquin.enums.ShippingStatus;
 import com.utp.creacionesjoaquin.security.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +22,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String note;
+    private String shippingAddress;
+    private String specificAddress;
     private BigDecimal shippingCost;
     private BigDecimal tax;
     private BigDecimal discount;
@@ -32,14 +33,15 @@ public class Order {
     private User user;
     @OneToMany(mappedBy = "order")
     private List<OrderDetail> orderDetails = new ArrayList<>();
-    private String address;
-    private LocalDate createdDate;
-    private LocalDate cancelledDate;
-    private LocalDate completedDate;
+    private Timestamp createdDate;
+    private Timestamp cancelledDate;
+    private Timestamp completedDate;
     @Enumerated( EnumType.STRING )
     private PaymentMethod paymentMethod;
-    @Enumerated( EnumType.STRING )
-    private ShippingStatus shippingStatus;
+    @OneToOne(mappedBy = "order")
+    private OrderShipping orderShipping;
+    @OneToOne(mappedBy = "order")
+    private OrderPreparation orderPreparation;
     @Enumerated( EnumType.STRING )
     private OrderStatus status;
     @OneToOne(mappedBy = "order")

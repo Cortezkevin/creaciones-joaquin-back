@@ -322,6 +322,8 @@ public class UserService {
                 roles.add( roleUser );
             }
 
+            //CREAR O ACTUALIZAR ROLES Y GENERAR CARRIERS O GROCERS NUEVOS
+
             user.setRoles( roles );
 
             User userUpdated = repository.save( user );

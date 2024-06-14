@@ -234,7 +234,7 @@ public class CartService {
 
     public ResponseWrapperDTO<CartDTO> clearCartByUser(String userId){
         try {
-            User user = userRepository.findByEmail(userId).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
             Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
             cart.setTotal(cart.getShippingCost());
             cart.setTax(BigDecimal.ZERO);

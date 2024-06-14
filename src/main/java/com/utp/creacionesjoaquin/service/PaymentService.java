@@ -6,20 +6,16 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.utp.creacionesjoaquin.cloudinary.dto.UploadDTO;
 import com.utp.creacionesjoaquin.cloudinary.service.CloudinaryService;
-import com.utp.creacionesjoaquin.dto.OrderCreatedDTO;
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
-import com.utp.creacionesjoaquin.dto.order.InvoiceDTO;
 import com.utp.creacionesjoaquin.dto.payment.PaymentIndentResponseDTO;
 import com.utp.creacionesjoaquin.dto.product.UploadResultDTO;
 import com.utp.creacionesjoaquin.enums.OrderStatus;
 import com.utp.creacionesjoaquin.enums.PaymentMethod;
-import com.utp.creacionesjoaquin.enums.ShippingStatus;
+import com.utp.creacionesjoaquin.enums.PreparationStatus;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 
 import com.utp.creacionesjoaquin.model.*;
-import com.utp.creacionesjoaquin.repository.InvoiceRepository;
-import com.utp.creacionesjoaquin.repository.OrderDetailRepository;
-import com.utp.creacionesjoaquin.repository.OrderRepository;
+import com.utp.creacionesjoaquin.repository.*;
 import com.utp.creacionesjoaquin.security.model.User;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
@@ -36,8 +31,9 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,13 +43,14 @@ import java.util.List;
 public class PaymentService {
 
     private final OrderRepository orderRepository;
+    private final OrderPreparationRepository preparationRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final ResourceLoader resourceLoader;
 
-    public ResponseWrapperDTO<String> successPayment(String userId){
+    public ResponseWrapperDTO<String> successPayment(String userId, String note, String specificAddress){
         try {
             User user = userRepository.findById( userId ).orElseThrow(() -> new ResourceNotFoundException(("Usuario no encontrado")));
             Address userAddress= user.getPersonalInformation().getAddress();
@@ -62,16 +59,16 @@ public class PaymentService {
             java.util.Date createdDate = new java.util.Date();
 
             Order newOrder = Order.builder()
-                    .address( userAddress.getFullAddress() )
                     .paymentMethod(PaymentMethod.TARJETA)
-                    .note("GAAA")
+                    .note(note)
+                    .specificAddress(specificAddress)
+                    .shippingAddress( userAddress.getFullAddress() )
                     .tax( userCart.getTax() )
                     .total( userCart.getTotal() )
                     .subtotal( userCart.getSubtotal() )
                     .discount( userCart.getDiscount() )
                     .shippingCost( user.getCart().getShippingCost())
-                    .shippingStatus( ShippingStatus.EN_PREPARACION )
-                    .createdDate( new Date(createdDate.getTime()).toLocalDate())
+                    .createdDate( new Timestamp(new Date().getTime()))
                     .status( OrderStatus.PENDIENTE )
                     .user( user )
                     .build();
@@ -90,9 +87,21 @@ public class PaymentService {
                         .build();
                 orderDetailList.add( newOrderDetail );
             });
+
             orderDetailRepository.saveAll( orderDetailList );
             orderCreated.setOrderDetails(orderDetailList);
 
+            //IMPLEMENTAR ENVIO DE MENSAJES AL WHATSAPP
+
+            OrderPreparation orderPreparation = OrderPreparation.builder()
+                    .order(orderCreated)
+                    .createdDate(new Timestamp(new Date().getTime()))
+                    .status(PreparationStatus.PENDIENTE)
+                    .build();
+
+            OrderPreparation preparationCreated = preparationRepository.save( orderPreparation );
+
+            orderCreated.setOrderPreparation(preparationCreated);
             orderRepository.save(orderCreated);
 
             log.info("CALL GENERATE UPLOAD PDF");
@@ -101,7 +110,7 @@ public class PaymentService {
             Invoice newInvoice = Invoice.builder()
                     .order( orderCreated )
                     .url(invoicePDFUrl)
-                    .issuedDate( new Date(createdDate.getTime()).toLocalDate() )
+                    .issuedDate( new java.sql.Date(createdDate.getTime()).toLocalDate() )
                     .build();
 
             invoiceRepository.save( newInvoice );
@@ -113,6 +122,7 @@ public class PaymentService {
                     .message( "Compra realizada correctamente"  )
                     .build();
         }catch (Exception e){
+            log.error(e.getMessage());
             return ResponseWrapperDTO.<String>builder()
                     .status(HttpStatus.OK.name())
                     .success( false )
@@ -187,15 +197,13 @@ public class PaymentService {
             params.put("ds",new JRBeanCollectionDataSource(order.getOrderDetails()));
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(report, params, new JREmptyDataSource());
-            byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
 
-            /*Path tempPDFPath = Files.createTempFile("invoice_"+order.getId(), ".pdf");
-            File tempPDFFile = tempPDFPath.toFile();*/
+            Path tempPDFPath = Files.createTempFile("invoice_"+order.getId(), ".pdf");
+            File tempPDFFile = tempPDFPath.toFile();
 
-            /*JasperExportManager.exportReportToPdfStream( jasperPrint, new FileOutputStream(tempPDFFile));*/
+            JasperExportManager.exportReportToPdfStream( jasperPrint, new FileOutputStream(tempPDFFile));
 
-            UploadResultDTO uploadResultDTO = cloudinaryService.upload("pdf/"+order.getUser().getId(), new UploadDTO(null, new ByteArrayInputStream(pdfBytes), "invoice_"+order.getId()));
-            log.info("UPLOAD DTO " + uploadResultDTO.url());
+            UploadResultDTO uploadResultDTO = cloudinaryService.upload("pdf/"+order.getUser().getId(), new UploadDTO(tempPDFFile, "invoice_"+order.getId()));
             return uploadResultDTO.url();
 
         }catch (ResourceNotFoundException e){

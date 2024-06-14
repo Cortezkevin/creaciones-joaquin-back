@@ -2,7 +2,6 @@ package com.utp.creacionesjoaquin.controller;
 
 import com.utp.creacionesjoaquin.cloudinary.utils.UploadUtils;
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
-import com.utp.creacionesjoaquin.dto.SubCategoryDTO;
 import com.utp.creacionesjoaquin.dto.product.*;
 import com.utp.creacionesjoaquin.service.ProductImagesService;
 import lombok.RequiredArgsConstructor;

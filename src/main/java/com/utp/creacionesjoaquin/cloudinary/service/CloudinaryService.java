@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,12 +66,7 @@ public class CloudinaryService {
                     "upload_preset", uploadPreset,
                     "public_id", publicId
             );
-            if( uploadDTO.file() != null ){
-
-            }
-            Map res = cloudinary.uploader().upload( uploadDTO.file() != null ? uploadDTO.file() : uploadDTO.inputStream(), params);
-            System.out.println(res.get("secure_url"));
-            System.out.println(res.toString());
+            Map res = cloudinary.uploader().upload( uploadDTO.file(), params);
             return new UploadResultDTO(publicId, res.get("secure_url").toString());
         }catch (IOException ex){
             log.error( ex.getMessage() );

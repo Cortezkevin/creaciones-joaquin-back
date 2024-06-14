@@ -27,9 +27,11 @@ public class PaymentController {
 
     @GetMapping("/success")
     public ResponseEntity<?> successPayment(
-            @RequestParam("user") String userId
+            @RequestParam("user") String userId,
+            @RequestParam(name = "note", required = false, defaultValue = "No agrego comentarios adicionales") String note,
+            @RequestParam(name = "specificAddress", required = false, defaultValue = "No se especifico la direccion") String specificAddress
     ){
-        ResponseWrapperDTO<String> response = paymentService.successPayment( userId );
+        ResponseWrapperDTO<String> response = paymentService.successPayment( userId, note, specificAddress );
         if( response.getSuccess() ){
             cartService.clearCartByUser(userId);
         }else {

@@ -1,6 +1,8 @@
 package com.utp.creacionesjoaquin.security.dto;
 
 import com.utp.creacionesjoaquin.dto.address.AddressDTO;
+import com.utp.creacionesjoaquin.dto.carrier.CarrierDTO;
+import com.utp.creacionesjoaquin.dto.grocer.GrocerDTO;
 import com.utp.creacionesjoaquin.model.PersonalInformation;
 import com.utp.creacionesjoaquin.security.enums.RolName;
 import com.utp.creacionesjoaquin.security.model.MainUser;
@@ -16,7 +18,8 @@ public record UserDTO (
         String lastName,
         String email,
         Set<String> roles,
-        ProfileDTO profile
+        ProfileDTO profile,
+        Object roleExtraData
 ){
 
     public static UserDTO parseToDTO( User user, MainUser muser){
@@ -30,7 +33,8 @@ public record UserDTO (
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",
                         user.getPersonalInformation().getAddress() != null ? AddressDTO.parseToDTO( user.getPersonalInformation().getAddress() ) : null,
                         user.getPersonalInformation().getPhone() != null ? user.getPersonalInformation().getPhone() : ""
-                )
+                ),
+                user.getGrocer() != null ? GrocerDTO.parseToDTO(user.getGrocer()) : user.getCarrier() != null ? CarrierDTO.parseToDTO(user.getCarrier()) : null
         );
     }
 
@@ -45,7 +49,8 @@ public record UserDTO (
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",
                         user.getPersonalInformation().getAddress() != null ? AddressDTO.parseToDTO( user.getPersonalInformation().getAddress() ) : null,
                         user.getPersonalInformation().getPhone() != null ? user.getPersonalInformation().getPhone() : ""
-                )
+                ),
+                user.getGrocer() != null ? GrocerDTO.parseToDTO(user.getGrocer()) : user.getCarrier() != null ? CarrierDTO.parseToDTO(user.getCarrier()) : null
         );
     }
 
@@ -60,7 +65,8 @@ public record UserDTO (
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",
                         user.getPersonalInformation().getAddress() != null ? AddressDTO.parseToDTO( user.getPersonalInformation().getAddress() ) : null,
                         user.getPersonalInformation().getPhone() != null ? user.getPersonalInformation().getPhone() : ""
-                )
+                ),
+                user.getGrocer() != null ? GrocerDTO.parseToDTO(user.getGrocer()) : user.getCarrier() != null ? CarrierDTO.parseToDTO(user.getCarrier()) : null
         );
     }
 }

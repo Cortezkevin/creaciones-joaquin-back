@@ -43,7 +43,7 @@ public class CollectionService {
     public ResponseWrapperDTO<CollectionDTO> create(NewCollectionDTO newCollectionDTO, File file){
         try {
             String id = UUID.randomUUID().toString();
-            UploadDTO uploadDTO = new UploadDTO(file,null, id);
+            UploadDTO uploadDTO = new UploadDTO(file, id);
             UploadResultDTO uploadResultDTO = cloudinaryService.upload( "collection", uploadDTO );
             if( uploadResultDTO != null ){
                 Category category = categoryRepository.findById(newCollectionDTO.category_id()).orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
@@ -82,7 +82,7 @@ public class CollectionService {
         try{
             Collection collection = collectionRepository.findById( updateCollectionDTO.id() ).orElseThrow(() -> new ResourceNotFoundException("Coleccion no encontrada"));
             if( file != null ){
-                UploadDTO uploadDTO = new UploadDTO(file,null, collection.getId());
+                UploadDTO uploadDTO = new UploadDTO(file, collection.getId());
                 boolean imageDeleted = cloudinaryService.delete("collection"+"/"+ UploadUtils.formatFileName(collection.getName()));
                 if( imageDeleted ){
                     UploadResultDTO uploadResultDTO = cloudinaryService.upload("collection", uploadDTO);

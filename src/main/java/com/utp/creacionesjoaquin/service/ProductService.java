@@ -54,7 +54,7 @@ public class ProductService {
         List<UploadDTO> uploadDTOList = new ArrayList<>();
         for (int i = 0; i < files.size(); i ++ ){
             File file = files.get(i);
-            uploadDTOList.add( new UploadDTO( file,null, id + "_" + (i+1) ));
+            uploadDTOList.add( new UploadDTO( file, id + "_" + (i+1) ));
         }
         //files.stream().map(f -> new UploadDTO(f, id + "_" + "1")).toList();
         List<UploadResultDTO> urlImages = cloudinaryService.uploadMany2( "product", uploadDTOList );

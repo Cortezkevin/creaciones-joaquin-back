@@ -1,5 +1,5 @@
 package com.utp.creacionesjoaquin.enums;
 
 public enum OrderStatus {
-    PENDIENTE, COMPLETADO, EN_PROCESO, ANULADO
+    PENDIENTE, EN_PROCESO, PREPARADO, ENVIADO, ENTREGADO, ANULADO
 }
