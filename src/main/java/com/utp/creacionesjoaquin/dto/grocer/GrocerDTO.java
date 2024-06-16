@@ -9,6 +9,7 @@ public record GrocerDTO(
         String id,
         String fullName,
         String email,
+        String phone,
         String userId,
         GrocerStatus status
 ) {
@@ -17,6 +18,7 @@ public record GrocerDTO(
                 grocer.getId(),
                 grocer.getUser().getPersonalInformation().getFullName(),
                 grocer.getUser().getEmail(),
+                grocer.getUser().getPersonalInformation().getPhone(),
                 grocer.getUser().getId(),
                 grocer.getStatus()
         );

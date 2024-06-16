@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,13 +32,23 @@ public class Cart {
         if (cartItems != null && cartItems.size() > 0) {
             BigDecimal newTotal = BigDecimal.ZERO;
             BigDecimal newSubtotal = BigDecimal.ZERO;
+            BigDecimal newTax = BigDecimal.ZERO;
             for (CartItem c: this.cartItems){
                 newTotal = newTotal.add( c.getTotal() );
                 newSubtotal = newSubtotal.add( c.getTotal() );
             }
-            newTotal = newTotal.add( shippingCost );
-            this.total = newTotal;
-            this.subtotal = newSubtotal;
+            if( subtotal.floatValue() < 2500.00){
+                newTotal = newTotal.add( shippingCost );
+            }
+            newTax = newTotal.multiply( BigDecimal.valueOf(0.18) ).setScale(2, RoundingMode.HALF_UP);
+            newTotal = newTotal.add( newTax );
+            this.tax = newTax;
+            this.total = newTotal.setScale(2, RoundingMode.HALF_UP);
+            this.subtotal = newSubtotal.setScale(2, RoundingMode.HALF_UP);
+        }else {
+            this.subtotal = BigDecimal.ZERO;
+            this.tax = this.shippingCost.multiply( BigDecimal.valueOf(0.18) ).setScale(2, RoundingMode.HALF_UP);
+            this.total = this.tax.add(this.shippingCost);
         }
     }
 }

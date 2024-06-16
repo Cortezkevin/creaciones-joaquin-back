@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.security.service;
 
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.dto.user.UpdateProfile;
 import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
 import com.utp.creacionesjoaquin.exception.customException.ResourceDuplicatedException;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
@@ -330,6 +331,37 @@ public class UserService {
 
             return ResponseWrapperDTO.<UserDTO>builder()
                     .message("Se actualizo el usuario")
+                    .status(HttpStatus.OK.name())
+                    .success( true )
+                    .content(UserDTO.parseToDTO(userUpdated))
+                    .build();
+        }catch (ResourceNotFoundException e){
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .success( false )
+                    .content( null )
+                    .build();
+        }
+    }
+
+    public ResponseWrapperDTO<UserDTO> updateProfile(UpdateProfile updateProfile) {
+        try {
+            User user = repository.findById( updateProfile.userId() ).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+            PersonalInformation personalInformation = personalInformationRepository.findByUser( user ).orElse(null);
+            if( personalInformation != null ){
+                personalInformation.setFirstName(updateProfile.firstName());
+                personalInformation.setLastName(updateProfile.lastName());
+                personalInformation.setPhone(updateProfile.phone());
+                PersonalInformation personalInformationUpdated = personalInformationRepository.save(personalInformation);
+                user.setPersonalInformation( personalInformationUpdated );
+            }
+
+            User userUpdated = repository.save( user );
+
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message("Se actualizo su informacion")
                     .status(HttpStatus.OK.name())
                     .success( true )
                     .content(UserDTO.parseToDTO(userUpdated))

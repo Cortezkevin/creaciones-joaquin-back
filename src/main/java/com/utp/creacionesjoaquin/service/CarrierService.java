@@ -7,13 +7,17 @@ import com.utp.creacionesjoaquin.enums.CarrierStatus;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import com.utp.creacionesjoaquin.model.Carrier;
 import com.utp.creacionesjoaquin.repository.CarrierRepository;
+import com.utp.creacionesjoaquin.security.enums.RolName;
+import com.utp.creacionesjoaquin.security.model.Role;
 import com.utp.creacionesjoaquin.security.model.User;
+import com.utp.creacionesjoaquin.security.repository.RoleRepository;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class CarrierService {
 
     private final CarrierRepository carrierRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     public ResponseWrapperDTO<List<CarrierDTO>> getAll(){
         List<CarrierDTO> carriers = carrierRepository.findAll().stream().map(CarrierDTO::parseToDTO).toList();
@@ -64,6 +69,9 @@ public class CarrierService {
     public ResponseWrapperDTO<CarrierDTO> create(NewCarrierDTO newCarrierDTO){
         try {
             User user = userRepository.findById(newCarrierDTO.userId()).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            Role role = roleRepository.findByRolName(RolName.ROLE_TRANSPORT).orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado"));
+            Set<Role> roles = user.getRoles();
+            roles.add( role );
 
             Carrier newCarrier = Carrier.builder()
                     .user(user)
@@ -71,7 +79,10 @@ public class CarrierService {
                     .status(newCarrierDTO.status())
                     .build();
 
+            user.setRoles( roles );
             Carrier carrierCreated = carrierRepository.save( newCarrier );
+            user.setCarrier( carrierCreated );
+            userRepository.save( user );
 
             return ResponseWrapperDTO.<CarrierDTO>builder()
                     .success(true)

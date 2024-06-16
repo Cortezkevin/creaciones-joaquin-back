@@ -2,6 +2,7 @@ package com.utp.creacionesjoaquin.controller;
 
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
 import com.utp.creacionesjoaquin.dto.RoleDTO;
+import com.utp.creacionesjoaquin.dto.user.UpdateProfile;
 import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
 import com.utp.creacionesjoaquin.security.dto.UserDTO;
 import com.utp.creacionesjoaquin.security.service.RoleService;
@@ -40,5 +41,13 @@ public class UserController {
             @RequestBody UpdateUserDTO updateUserDTO
             ){
         return ResponseEntity.ok( userService.update( updateUserDTO ) );
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PutMapping("/profile")
+    public ResponseEntity<ResponseWrapperDTO<UserDTO>> update(
+            @RequestBody UpdateProfile updateProfile
+    ){
+        return ResponseEntity.ok( userService.updateProfile( updateProfile ) );
     }
 }

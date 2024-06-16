@@ -49,6 +49,7 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final ResourceLoader resourceLoader;
+    private final ProductRepository productRepository;
 
     public ResponseWrapperDTO<String> successPayment(String userId, String note, String specificAddress){
         try {
@@ -77,6 +78,11 @@ public class PaymentService {
 
             List<OrderDetail> orderDetailList = new ArrayList<>();
             userCart.getCartItems().forEach(cartItem -> {
+                ///
+                Product product = productRepository.findById( cartItem.getProduct().getId() ).get();
+                product.setStock( product.getStock() - cartItem.getAmount() );
+                productRepository.save( product );
+                ///
                 OrderDetail newOrderDetail = OrderDetail.builder()
                         .order( orderCreated )
                         .amount( cartItem.getAmount() )

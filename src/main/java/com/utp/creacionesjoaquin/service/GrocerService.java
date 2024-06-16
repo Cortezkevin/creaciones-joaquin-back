@@ -8,13 +8,17 @@ import com.utp.creacionesjoaquin.enums.GrocerStatus;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import com.utp.creacionesjoaquin.model.Grocer;
 import com.utp.creacionesjoaquin.repository.GrocerRepository;
+import com.utp.creacionesjoaquin.security.enums.RolName;
+import com.utp.creacionesjoaquin.security.model.Role;
 import com.utp.creacionesjoaquin.security.model.User;
+import com.utp.creacionesjoaquin.security.repository.RoleRepository;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class GrocerService {
 
     private final GrocerRepository grocerRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     public ResponseWrapperDTO<List<GrocerDTO>> getAll(){
         List<GrocerDTO> grocers = grocerRepository.findAll().stream().map(GrocerDTO::parseToDTO).toList();
@@ -36,13 +41,19 @@ public class GrocerService {
     public ResponseWrapperDTO<GrocerDTO> create(NewGrocerDTO newGrocerDTO){
         try {
             User user = userRepository.findById(newGrocerDTO.userId()).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            Role role = roleRepository.findByRolName(RolName.ROLE_WAREHOUSE).orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado"));
+            Set<Role> roles = user.getRoles();
+            roles.add( role );
 
             Grocer newGrocer = Grocer.builder()
                     .user(user)
                     .status(GrocerStatus.DISPONIBLE)
                     .build();
 
+            user.setRoles( roles );
             Grocer grocerCreated = grocerRepository.save( newGrocer );
+            user.setGrocer( grocerCreated );
+            userRepository.save( user );
 
             return ResponseWrapperDTO.<GrocerDTO>builder()
                     .success(true)

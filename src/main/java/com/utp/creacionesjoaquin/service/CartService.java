@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +77,7 @@ public class CartService {
             Cart cart = cartRepository.findById(addItemDTO.cart_id()).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
             Product product = productRepository.findById(addItemDTO.product_id()).orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-            if( product.getStock() <= addItemDTO.amount() ){
+            if( product.getStock() < addItemDTO.amount() ){
                 return ResponseWrapperDTO.<CartDTO>builder()
                         .message("La cantidad del producto a agregar excede las existencias")
                         .success(false)
@@ -93,7 +94,7 @@ public class CartService {
                         .cart( cart )
                         .amount( addItemDTO.amount() )
                         .product( product )
-                        .total( product.getPrice().multiply(BigDecimal.valueOf(addItemDTO.amount())))
+                        .total( product.getPrice().multiply(BigDecimal.valueOf(addItemDTO.amount())).setScale(2, RoundingMode.HALF_UP))
                         .build();
 
                 cartItemRepository.save( newCartItem );
@@ -109,7 +110,7 @@ public class CartService {
                 message = "Cantidad aumentada";
                 int newAmount = cartItemInCart.getAmount() + addItemDTO.amount();
                 cartItemInCart.setAmount(newAmount);
-                cartItemInCart.setTotal(cartItemInCart.getProduct().getPrice().multiply(BigDecimal.valueOf(newAmount)));
+                cartItemInCart.setTotal(cartItemInCart.getProduct().getPrice().multiply(BigDecimal.valueOf(newAmount)).setScale(2, RoundingMode.HALF_UP));
                 cartItemRepository.save(cartItemInCart);
             }
 
@@ -149,7 +150,7 @@ public class CartService {
                     message = "Item removido del carrito";
                 }else {
                     cartItem.setAmount(newAmount);
-                    cartItem.setTotal(cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(newAmount)));
+                    cartItem.setTotal(cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(newAmount)).setScale(2, RoundingMode.HALF_UP));
                     cartItemRepository.save( cartItem  );
                     message = "Cantidad reducida";
                 }
@@ -180,8 +181,9 @@ public class CartService {
     public ResponseWrapperDTO<CartDTO> updateShippingCost(UpdateShippingCostDTO updateShippingCostDTO){
         try {
             Cart cart = cartRepository.findById(updateShippingCostDTO.cartId()).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
-            cart.setShippingCost( updateShippingCostDTO.shippingCost() );
+            cart.setShippingCost( updateShippingCostDTO.shippingCost().setScale(2, RoundingMode.HALF_UP) );
             cart.calculateTotals();
+            System.out.println(cart.getTax());
 
             Cart cartUpdated = cartRepository.save( cart );
             return ResponseWrapperDTO.<CartDTO>builder()
@@ -236,7 +238,7 @@ public class CartService {
         try {
             User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
             Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
-            cart.setTotal(cart.getShippingCost());
+            cart.setTotal(cart.getShippingCost().setScale(2, RoundingMode.HALF_UP));
             cart.setTax(BigDecimal.ZERO);
             cart.setDiscount(BigDecimal.ZERO);
             cart.setSubtotal(BigDecimal.ZERO);
