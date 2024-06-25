@@ -13,10 +13,7 @@ import com.utp.creacionesjoaquin.dto.product.UpdateProductDTO;
 import com.utp.creacionesjoaquin.dto.product.UploadResultDTO;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import com.utp.creacionesjoaquin.model.*;
-import com.utp.creacionesjoaquin.repository.CollectionRepository;
-import com.utp.creacionesjoaquin.repository.ProductImagesRepository;
-import com.utp.creacionesjoaquin.repository.ProductRepository;
-import com.utp.creacionesjoaquin.repository.SubCategoryRepository;
+import com.utp.creacionesjoaquin.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,6 +32,7 @@ public class ProductService {
     private final CollectionRepository collectionRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final ProductImagesRepository productImagesRepository;
+    private final SupplierRepository supplierRepository;
 
     private final CloudinaryService cloudinaryService;
 
@@ -48,15 +46,33 @@ public class ProductService {
                 .build();
     }
 
+    public ResponseWrapperDTO<List<ProductDTO>> getBySupplier(String supplierId){
+        try {
+            Supplier supplier = supplierRepository.findById( supplierId ).orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado"));
+            List<ProductDTO> productDTOList = productRepository.findBySupplier( supplier ).stream().map( ProductDTO::fromEntity ).toList();
+            return ResponseWrapperDTO.<List<ProductDTO>>builder()
+                    .status(HttpStatus.OK.name())
+                    .success(true)
+                    .message("Solicitud ejecutada correctamente")
+                    .content(productDTOList)
+                    .build();
+        }catch (ResourceNotFoundException e){
+            return ResponseWrapperDTO.<List<ProductDTO>>builder()
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .success(false)
+                    .message(e.getMessage())
+                    .content(null)
+                    .build();
+        }
+    }
+
     public ResponseWrapperDTO<ProductDTO> create(NewProductDTO newProductDTO, List<File> files){
-        System.out.println("FILES SIZE: " + files.size());
         String id = UUID.randomUUID().toString();
         List<UploadDTO> uploadDTOList = new ArrayList<>();
         for (int i = 0; i < files.size(); i ++ ){
             File file = files.get(i);
             uploadDTOList.add( new UploadDTO( file, id + "_" + (i+1) ));
         }
-        //files.stream().map(f -> new UploadDTO(f, id + "_" + "1")).toList();
         List<UploadResultDTO> urlImages = cloudinaryService.uploadMany2( "product", uploadDTOList );
         if( urlImages != null){
             SubCategory subCategory = subCategoryRepository.findById(newProductDTO.subcategory_id()).orElseThrow(() -> new RuntimeException("ERROR: SUBCATEGORY NOT FOUNDED"));
@@ -65,9 +81,15 @@ public class ProductService {
                     .name( newProductDTO.name() )
                     .description( newProductDTO.description() )
                     .price( newProductDTO.price() )
-                    .stock(newProductDTO.stock() )
+                    //.stock(newProductDTO.stock() ) // 0 STOCK INICIALMENTE, SI SE QUIERE AGREGAR STOCK SE DEBE REALIZAR UN MOVIMIENTO, FABRICACION
                     .subCategory( subCategory )
                     .build();
+
+            if(newProductDTO.supplierId() != null ){
+                Supplier supplier = supplierRepository.findById(newProductDTO.supplierId()).orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
+                newProduct.setSupplier( supplier );
+            }
+
             Product productCreated = productRepository.save( newProduct );
 
             List<ProductImages> newProductImages = urlImages.stream().map( result -> ProductImages.builder().url_image(result.url()).image_id(result.public_id()).product(productCreated).build() ).toList();
@@ -108,12 +130,16 @@ public class ProductService {
             product.setPrice(updateProductDTO.newPrice());
             product.setStock(updateProductDTO.newStock());
 
-            System.out.println(product.getName());
-            System.out.println(updateProductDTO.newCollectionId());
-
             if( product.getSubCategory().getId() != updateProductDTO.newSubCategoryId() ){
                 SubCategory subCategory = subCategoryRepository.findById( updateProductDTO.newSubCategoryId()).orElseThrow(() -> new ResourceNotFoundException("Subcategoria no encontrada"));
                 product.setSubCategory( subCategory );
+            }
+
+            if( updateProductDTO.newSupplierId() != null ){
+                if( product.getSupplier().getId() != updateProductDTO.newSupplierId() ){
+                    Supplier supplier = supplierRepository.findById(updateProductDTO.newSupplierId()).orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
+                    product.setSupplier( supplier );
+                }
             }
 
             if(updateProductDTO.newCollectionId() != null ){
@@ -130,7 +156,6 @@ public class ProductService {
                     .content(productDTO)
                     .build();
         }catch (Exception e){
-            System.out.println("ERROR UPDATE PRODUCT: "+ e.getMessage());
             return ResponseWrapperDTO.<ProductDTO>builder()
                     .status(HttpStatus.OK.name())
                     .success(false)

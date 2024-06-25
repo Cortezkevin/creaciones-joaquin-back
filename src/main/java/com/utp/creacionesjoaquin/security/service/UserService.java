@@ -1,6 +1,9 @@
 package com.utp.creacionesjoaquin.security.service;
 
+import com.utp.creacionesjoaquin.cloudinary.dto.UploadDTO;
+import com.utp.creacionesjoaquin.cloudinary.service.CloudinaryService;
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.dto.product.UploadResultDTO;
 import com.utp.creacionesjoaquin.dto.user.UpdateProfile;
 import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
 import com.utp.creacionesjoaquin.exception.customException.ResourceDuplicatedException;
@@ -12,6 +15,7 @@ import com.utp.creacionesjoaquin.repository.PersonalInformationRepository;
 import com.utp.creacionesjoaquin.repository.ProductRepository;
 import com.utp.creacionesjoaquin.security.dto.*;
 import com.utp.creacionesjoaquin.security.enums.RolName;
+import com.utp.creacionesjoaquin.security.enums.Status;
 import com.utp.creacionesjoaquin.security.jwt.JwtProvider;
 import com.utp.creacionesjoaquin.security.model.MainUser;
 import com.utp.creacionesjoaquin.security.model.Role;
@@ -30,7 +34,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +75,9 @@ public class UserService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     public ResponseWrapperDTO<List<UserDTO>> findAllUsers(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -111,6 +120,14 @@ public class UserService {
     public ResponseWrapperDTO<UserDTO> getUserFromToken(String token ){
         String username = jwtProvider.getUsernameFromToken( token );
         User user = repository.findByEmail( username ).orElseThrow( () -> new ResourceNotFoundException("User not found with username: " + username)) ;
+        if( user.getStatus().equals(Status.INACTIVO)){
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message("Su cuenta fue deshabilitada, favor de comunicarse con soporte para mas informacion")
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .success( false )
+                    .content( null )
+                    .build();
+        }
         return ResponseWrapperDTO.<UserDTO>builder()
                 .message("Success Request")
                 .status(HttpStatus.OK.name())
@@ -123,6 +140,16 @@ public class UserService {
     public ResponseWrapperDTO<JwtTokenDTO> loginUser(LoginUserDTO loginUserDTO ){
         User userFound = repository.findByEmail(loginUserDTO.email()).orElseThrow(() -> new ResourceNotFoundException("Email no existente"));
         if( userFound != null ){
+
+            if( userFound.getStatus().equals(Status.INACTIVO)){
+                return ResponseWrapperDTO.<JwtTokenDTO>builder()
+                        .message("Su cuenta fue deshabilitada, favor de comunicarse con soporte para mas informacion")
+                        .status(HttpStatus.BAD_REQUEST.name())
+                        .success( false )
+                        .content( null )
+                        .build();
+            }
+
             boolean validPassword = passwordEncoder.matches(loginUserDTO.password(), userFound.getPassword());
             if( validPassword ){
                 Authentication authentication =
@@ -168,6 +195,7 @@ public class UserService {
                     .email(newUserDTO.email())
                     .password(passwordEncoder.encode(newUserDTO.password()))
                     .roles( roles )
+                    .status(Status.ACTIVO)
                     .build();
             User userCreated = repository.save(newUser);
 
@@ -201,6 +229,7 @@ public class UserService {
 
                 List<CartItem> cartItems = cartItemRepository.saveAll( cartItemList );
                 cartCreated.setCartItems( cartItems );
+                cartCreated.setShippingCost( newUserDTO.memoryCart().shippingCost() );
                 cartRepository.save(cartCreated);
 
             }
@@ -307,6 +336,7 @@ public class UserService {
         try {
             User user = repository.findById( updateUserDTO.userId() ).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
             user.setEmail( updateUserDTO.email() );
+            user.setStatus( updateUserDTO.status() );
 
             PersonalInformation personalInformation = personalInformationRepository.findByUser( user ).orElse(null);
             if( personalInformation != null ){
@@ -322,8 +352,6 @@ public class UserService {
                 Role roleUser = roleRepository.findByRolName( RolName.valueOf( r ) ).orElseThrow(() -> new ResourceNotFoundException("El rol: " + r + " no existe"));
                 roles.add( roleUser );
             }
-
-            //CREAR O ACTUALIZAR ROLES Y GENERAR CARRIERS O GROCERS NUEVOS
 
             user.setRoles( roles );
 
@@ -345,15 +373,24 @@ public class UserService {
         }
     }
 
-    public ResponseWrapperDTO<UserDTO> updateProfile(UpdateProfile updateProfile) {
+    public ResponseWrapperDTO<UserDTO> updateProfile(UpdateProfile updateProfile, File file) {
         try {
             User user = repository.findById( updateProfile.userId() ).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-
             PersonalInformation personalInformation = personalInformationRepository.findByUser( user ).orElse(null);
             if( personalInformation != null ){
+
+                if( file != null){
+                    UploadDTO uploadDTO = new UploadDTO(file, user.getId());
+                    UploadResultDTO uploadResultDTO = cloudinaryService.upload( "profile", uploadDTO );
+                    if( uploadResultDTO != null){
+                        personalInformation.setPhotoUrl( uploadResultDTO.url() );
+                    }
+                }
+
                 personalInformation.setFirstName(updateProfile.firstName());
                 personalInformation.setLastName(updateProfile.lastName());
                 personalInformation.setPhone(updateProfile.phone());
+                personalInformation.setBirthdate(LocalDate.parse(updateProfile.birthdate()));
                 PersonalInformation personalInformationUpdated = personalInformationRepository.save(personalInformation);
                 user.setPersonalInformation( personalInformationUpdated );
             }

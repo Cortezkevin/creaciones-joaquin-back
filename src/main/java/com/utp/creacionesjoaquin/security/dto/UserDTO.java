@@ -5,6 +5,7 @@ import com.utp.creacionesjoaquin.dto.carrier.CarrierDTO;
 import com.utp.creacionesjoaquin.dto.grocer.GrocerDTO;
 import com.utp.creacionesjoaquin.model.PersonalInformation;
 import com.utp.creacionesjoaquin.security.enums.RolName;
+import com.utp.creacionesjoaquin.security.enums.Status;
 import com.utp.creacionesjoaquin.security.model.MainUser;
 import com.utp.creacionesjoaquin.security.model.Role;
 import com.utp.creacionesjoaquin.security.model.User;
@@ -17,6 +18,8 @@ public record UserDTO (
         String firstName,
         String lastName,
         String email,
+        String photoUrl,
+        Status status,
         Set<String> roles,
         ProfileDTO profile,
         Object roleExtraData
@@ -28,6 +31,8 @@ public record UserDTO (
                 user.getPersonalInformation().getFirstName(),
                 user.getPersonalInformation().getLastName(),
                 muser.getEmail(),
+                user.getPersonalInformation().getPhotoUrl() != null ? user.getPersonalInformation().getPhotoUrl() : "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg",
+                user.getStatus(),
                 muser.getRoles().stream().map(RolName::name).collect(Collectors.toSet()),
                 new ProfileDTO(
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",
@@ -44,6 +49,8 @@ public record UserDTO (
                 personalInformation.getFirstName(),
                 personalInformation.getLastName(),
                 user.getEmail(),
+                user.getPersonalInformation().getPhotoUrl() != null ? user.getPersonalInformation().getPhotoUrl() : "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg",
+                user.getStatus(),
                 user.getRoles().stream().map(Role::getRolName).map(RolName::name).collect(Collectors.toSet()),
                 new ProfileDTO(
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",
@@ -60,6 +67,8 @@ public record UserDTO (
                 user.getPersonalInformation().getFirstName(),
                 user.getPersonalInformation().getLastName(),
                 user.getEmail(),
+                user.getPersonalInformation().getPhotoUrl() != null ? user.getPersonalInformation().getPhotoUrl() : "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg",
+                user.getStatus(),
                 user.getRoles().stream().map(Role::getRolName).map(RolName::name).collect(Collectors.toSet()),
                 new ProfileDTO(
                         user.getPersonalInformation().getBirthdate() != null ? user.getPersonalInformation().getBirthdate().toString() : "",

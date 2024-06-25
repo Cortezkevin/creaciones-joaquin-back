@@ -18,10 +18,16 @@ public class Grocer {
     @Id
     @GeneratedValue( strategy = GenerationType.UUID)
     private String id;
+
     @Enumerated( EnumType.STRING )
     private GrocerStatus status;
+
     @OneToOne(fetch = FetchType.EAGER)
     private User user;
-    @OneToMany(mappedBy = "grocer")
+
+    @OneToMany(mappedBy = "grocer", fetch = FetchType.LAZY)
     private List<OrderPreparation> orderPreparations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "grocer", fetch = FetchType.LAZY)
+    private List<PurchaseOrderReception> purchaseOrderReceptions = new ArrayList<>();
 }

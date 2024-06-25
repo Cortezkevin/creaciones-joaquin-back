@@ -2,6 +2,7 @@ package com.utp.creacionesjoaquin.security.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.utp.creacionesjoaquin.model.*;
+import com.utp.creacionesjoaquin.security.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,10 +23,15 @@ public class User {
     @GeneratedValue( strategy = GenerationType.UUID )
     private String id;
     private String email;
+
     @JsonIgnore
     private String password;
+
     @JsonIgnore
     private String tokenPassword;
+
+    @Enumerated( EnumType.STRING )
+    private Status status;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -34,6 +40,7 @@ public class User {
             inverseJoinColumns = @JoinColumn( name = "role_id", nullable = false)
     )
     private Set<Role> roles = new HashSet<>();
+
     @OneToOne(mappedBy = "user")
     private Cart cart;
 
@@ -48,4 +55,7 @@ public class User {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
 }

@@ -4,6 +4,9 @@ public record UpdateProfile(
         String userId,
         String firstName,
         String lastName,
-        String phone
+        String email,
+        String phone,
+        String birthdate,
+        String photoUrl
 ) {
 }

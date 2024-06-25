@@ -9,6 +9,7 @@ public record UpdateProductDTO(
         BigDecimal newPrice,
         Integer newStock,
         String newSubCategoryId,
-        String newCollectionId
+        String newCollectionId,
+        String newSupplierId
 ) {
 }

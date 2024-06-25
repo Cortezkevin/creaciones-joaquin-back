@@ -9,6 +9,7 @@ import com.utp.creacionesjoaquin.cloudinary.service.CloudinaryService;
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
 import com.utp.creacionesjoaquin.dto.payment.PaymentIndentResponseDTO;
 import com.utp.creacionesjoaquin.dto.product.UploadResultDTO;
+import com.utp.creacionesjoaquin.enums.InventoryMovementType;
 import com.utp.creacionesjoaquin.enums.OrderStatus;
 import com.utp.creacionesjoaquin.enums.PaymentMethod;
 import com.utp.creacionesjoaquin.enums.PreparationStatus;
@@ -41,6 +42,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
+    private final InventoryMovementsRepository inventoryMovementsRepository;
 
     private final OrderRepository orderRepository;
     private final OrderPreparationRepository preparationRepository;
@@ -79,9 +81,19 @@ public class PaymentService {
             List<OrderDetail> orderDetailList = new ArrayList<>();
             userCart.getCartItems().forEach(cartItem -> {
                 ///
-                Product product = productRepository.findById( cartItem.getProduct().getId() ).get();
+                /*Product product = productRepository.findById( cartItem.getProduct().getId() ).get();
+
+                InventoryMovements inventoryMovements = InventoryMovements.builder()
+                        .date( new Timestamp(System.currentTimeMillis()))
+                        .product(product)
+                        .type(InventoryMovementType.SALIDA)
+                        .amount( cartItem.getAmount() )
+                        .build();
+
+                inventoryMovementsRepository.save( inventoryMovements );
+
                 product.setStock( product.getStock() - cartItem.getAmount() );
-                productRepository.save( product );
+                productRepository.save( product );*/
                 ///
                 OrderDetail newOrderDetail = OrderDetail.builder()
                         .order( orderCreated )

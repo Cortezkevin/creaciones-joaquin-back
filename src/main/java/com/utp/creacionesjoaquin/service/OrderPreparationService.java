@@ -5,10 +5,7 @@ import com.utp.creacionesjoaquin.dto.order.*;
 import com.utp.creacionesjoaquin.enums.*;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import com.utp.creacionesjoaquin.model.*;
-import com.utp.creacionesjoaquin.repository.GrocerRepository;
-import com.utp.creacionesjoaquin.repository.OrderPreparationRepository;
-import com.utp.creacionesjoaquin.repository.OrderRepository;
-import com.utp.creacionesjoaquin.repository.OrderShippingRepository;
+import com.utp.creacionesjoaquin.repository.*;
 import com.utp.creacionesjoaquin.security.model.User;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +25,8 @@ public class OrderPreparationService {
     private final GrocerRepository grocerRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final InventoryMovementsRepository inventoryMovementsRepository;
 
     public ResponseWrapperDTO<List<OrderPreparationDTO>> getAllOrderPreparation(){
         List<OrderPreparationDTO> orderPreparationDTOList = orderPreparationRepository.findAll().stream().map(OrderPreparationDTO::parseToDTO).toList();
@@ -175,6 +174,22 @@ public class OrderPreparationService {
                         .content(null)
                         .build();
             }
+
+            order.getOrderDetails().forEach(o -> {
+                Product product = productRepository.findById(  o.getProduct().getId() ).get();
+
+                InventoryMovements inventoryMovements = InventoryMovements.builder()
+                        .date( new Timestamp(System.currentTimeMillis()))
+                        .product(product)
+                        .type(InventoryMovementType.SALIDA)
+                        .amount( o .getAmount() )
+                        .build();
+
+                inventoryMovementsRepository.save( inventoryMovements );
+
+                product.setStock( product.getStock() - o.getAmount() );
+                productRepository.save( product );
+            });
 
             orderPreparation.setStatus( PreparationStatus.LISTO_PARA_RECOGER );
             orderPreparation.setCompletedDate(new Timestamp(new Date().getTime()));

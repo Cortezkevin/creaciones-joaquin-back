@@ -30,6 +30,13 @@ public class ProductController {
         return ResponseEntity.ok( productService.getAll() );
     }
 
+    @GetMapping("/bySupplier")
+    public ResponseEntity<ResponseWrapperDTO<List<ProductDTO>>> getAll(
+            @RequestParam(name = "supplier") String supplierId
+    ){
+        return ResponseEntity.ok( productService.getBySupplier( supplierId ) );
+    }
+
     @GetMapping("/public/{id}")
     public ResponseEntity<ResponseWrapperDTO<ProductDTO>> getById(
             @PathVariable("id") String id

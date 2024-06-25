@@ -1,5 +1,7 @@
 package com.utp.creacionesjoaquin.dto.user;
 
+import com.utp.creacionesjoaquin.security.enums.Status;
+
 import java.util.List;
 
 public record UpdateUserDTO (
@@ -7,6 +9,7 @@ public record UpdateUserDTO (
         String firstName,
         String lastName,
         String email,
+        Status status,
         List<String> roles
 ){
 }

@@ -20,6 +20,7 @@ public class PersonalInformation {
     private String lastName;
     private String phone;
     private LocalDate birthdate;
+    private String photoUrl;
     @OneToOne(fetch = FetchType.EAGER)
     private User user;
     @OneToOne(fetch = FetchType.EAGER)

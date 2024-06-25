@@ -7,6 +7,7 @@ public record NewProductDTO(
         String description,
         BigDecimal price,
         Integer stock,
-        String subcategory_id
+        String subcategory_id,
+        String supplierId
 ) {
 }

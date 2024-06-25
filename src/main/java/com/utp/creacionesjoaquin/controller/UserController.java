@@ -1,17 +1,22 @@
 package com.utp.creacionesjoaquin.controller;
 
+import com.utp.creacionesjoaquin.cloudinary.utils.UploadUtils;
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
 import com.utp.creacionesjoaquin.dto.RoleDTO;
+import com.utp.creacionesjoaquin.dto.category.UpdateCategoryDTO;
 import com.utp.creacionesjoaquin.dto.user.UpdateProfile;
 import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
 import com.utp.creacionesjoaquin.security.dto.UserDTO;
 import com.utp.creacionesjoaquin.security.service.RoleService;
 import com.utp.creacionesjoaquin.security.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 @CrossOrigin
@@ -44,10 +49,13 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PutMapping("/profile")
+    @PutMapping(value = "/profile", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ResponseWrapperDTO<UserDTO>> update(
-            @RequestBody UpdateProfile updateProfile
+            @RequestPart(name = "file", required = false) MultipartFile multipartFile,
+            @RequestPart("updateProfileDTO") String updateProfileDTOString
     ){
-        return ResponseEntity.ok( userService.updateProfile( updateProfile ) );
+        UpdateProfile updateProfile = UploadUtils.convertStringToObject( updateProfileDTOString, UpdateProfile.class );
+        File fileToUpload = UploadUtils.getFileFromMultipartFile( multipartFile );
+        return ResponseEntity.ok( userService.updateProfile( updateProfile, fileToUpload ) );
     }
 }
