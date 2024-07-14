@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.dto.product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record UpdateProductDTO(
         String id,
@@ -10,6 +11,7 @@ public record UpdateProductDTO(
         Integer newStock,
         String newSubCategoryId,
         String newCollectionId,
-        String newSupplierId
+        String newSupplierId,
+        List<ProductMaterialsDTO> materials
 ) {
 }

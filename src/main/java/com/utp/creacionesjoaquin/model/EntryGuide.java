@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Builder
@@ -18,11 +20,21 @@ public class EntryGuide {
 
     private Timestamp date;
     private String productConditions;
-    private String warehouseLocation;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    private Supplier supplier;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Grocer grocer;
+
+    //quitar
+    /*ManyToOne(fetch = FetchType.EAGER)
+    private Supplier supplier;*/
 
     @OneToOne(fetch = FetchType.EAGER)
     private PurchaseOrder purchaseOrder;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Warehouse warehouse;
+
+    @OneToMany(mappedBy = "entryGuide")
+    private List<InventoryMovements> inventoryMovementsList = new ArrayList<>();
+
 }

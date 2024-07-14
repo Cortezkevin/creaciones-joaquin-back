@@ -51,4 +51,8 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Supplier supplier;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    private List<ProductMaterials> productRawMaterials = new ArrayList<>();
+
 }

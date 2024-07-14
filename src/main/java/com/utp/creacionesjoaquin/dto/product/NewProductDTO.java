@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.dto.product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record NewProductDTO(
         String name,
@@ -8,6 +9,7 @@ public record NewProductDTO(
         BigDecimal price,
         Integer stock,
         String subcategory_id,
-        String supplierId
+        String supplierId,
+        List<ProductMaterialsDTO> materials
 ) {
 }

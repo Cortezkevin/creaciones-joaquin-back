@@ -20,8 +20,11 @@ public class RejectionGuide {
     private String productConditions;
     private String suggestions;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    private Supplier supplier;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Grocer grocer;
+
+    /*@ManyToOne(fetch = FetchType.EAGER, optional = false)
+    private Supplier supplier;*/
 
     @OneToOne(fetch = FetchType.EAGER)
     private PurchaseOrder purchaseOrder;

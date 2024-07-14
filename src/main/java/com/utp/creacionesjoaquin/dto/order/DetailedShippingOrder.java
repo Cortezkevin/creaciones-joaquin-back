@@ -15,6 +15,7 @@ public record DetailedShippingOrder(
         Timestamp preparedDate,
         Timestamp shippingDate,
         Timestamp completedDate,
+        String exitGuideId,
         ShippingStatus status
 ) {
     public static DetailedShippingOrder parseToDTO(OrderShipping orderShipping) {
@@ -27,6 +28,7 @@ public record DetailedShippingOrder(
                 orderShipping.getPreparedDate(),
                 orderShipping.getShippingDate(),
                 orderShipping.getCompletedDate(),
+                orderShipping.getOrder().getExitGuide().getId(),
                 orderShipping.getStatus()
         );
     }

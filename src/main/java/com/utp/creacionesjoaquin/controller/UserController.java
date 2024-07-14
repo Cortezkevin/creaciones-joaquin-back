@@ -6,9 +6,11 @@ import com.utp.creacionesjoaquin.dto.RoleDTO;
 import com.utp.creacionesjoaquin.dto.category.UpdateCategoryDTO;
 import com.utp.creacionesjoaquin.dto.user.UpdateProfile;
 import com.utp.creacionesjoaquin.dto.user.UpdateUserDTO;
+import com.utp.creacionesjoaquin.security.dto.CreateUserDTO;
 import com.utp.creacionesjoaquin.security.dto.UserDTO;
 import com.utp.creacionesjoaquin.security.service.RoleService;
 import com.utp.creacionesjoaquin.security.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,14 @@ public class UserController {
     @GetMapping("/roles")
     public ResponseEntity<ResponseWrapperDTO<List<RoleDTO>>> getAllRoles(){
         return ResponseEntity.ok( roleService.getRoles() );
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping
+    public ResponseEntity<ResponseWrapperDTO<UserDTO>> create(
+            @Valid @RequestBody CreateUserDTO createUserDTO
+            ){
+        return ResponseEntity.ok( userService.createUser( createUserDTO ) );
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

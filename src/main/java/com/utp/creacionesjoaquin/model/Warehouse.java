@@ -20,4 +20,11 @@ public class Warehouse {
 
     @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
     List<InventoryMovements> inventoryMovements = new ArrayList<>();
+
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
+    List<EntryGuide> entryGuides = new ArrayList<>();
+
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
+    List<ExitGuide> exitGuides = new ArrayList<>();
+
 }

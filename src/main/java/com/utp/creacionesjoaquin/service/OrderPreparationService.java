@@ -9,10 +9,12 @@ import com.utp.creacionesjoaquin.repository.*;
 import com.utp.creacionesjoaquin.security.model.User;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,9 +29,12 @@ public class OrderPreparationService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final InventoryMovementsRepository inventoryMovementsRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final ExitGuideRepository exitGuideRepository;
 
     public ResponseWrapperDTO<List<OrderPreparationDTO>> getAllOrderPreparation(){
-        List<OrderPreparationDTO> orderPreparationDTOList = orderPreparationRepository.findAll().stream().map(OrderPreparationDTO::parseToDTO).toList();
+        Sort sort = Sort.by( Sort.Direction.DESC, "createdDate" );
+        List<OrderPreparationDTO> orderPreparationDTOList = orderPreparationRepository.findAll(sort).stream().map(OrderPreparationDTO::parseToDTO).toList();
         return ResponseWrapperDTO.<List<OrderPreparationDTO>>builder()
                 .message("Solicitud satisfactoria")
                 .status(HttpStatus.OK.name())
@@ -156,6 +161,7 @@ public class OrderPreparationService {
             OrderPreparation orderPreparation = orderPreparationRepository.findById( completedOrderPreparationDTO.orderPreparationId() ).orElseThrow(() -> new ResourceNotFoundException("Entrega de pedido no encontrado"));
             Grocer grocer = grocerRepository.findById( orderPreparation.getGrocer().getId() ).orElseThrow(() -> new ResourceNotFoundException("Almacenero no encontrado"));
             Order order = orderRepository.findById( orderPreparation.getOrder().getId() ).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
+            Warehouse warehouse = warehouseRepository.findById(completedOrderPreparationDTO.warehouse() ).orElseThrow(() -> new ResourceNotFoundException("Almacen no encontrado"));
 
             if( order.getStatus() == OrderStatus.ANULADO){
                 return ResponseWrapperDTO.<OrderPreparationDTO>builder()
@@ -175,21 +181,40 @@ public class OrderPreparationService {
                         .build();
             }
 
+            ExitGuide newExitGuide = ExitGuide.builder()
+                    .date(new Timestamp(System.currentTimeMillis()))
+                    .observations(completedOrderPreparationDTO.observations())
+                    .order(order)
+                    .grocer( grocer )
+                    .warehouse( warehouse )
+                    .build();
+
+            ExitGuide exitGuideCreated = exitGuideRepository.save( newExitGuide );
+
+            List<InventoryMovements> newInventoryMovementsList = new ArrayList<>();
             order.getOrderDetails().forEach(o -> {
                 Product product = productRepository.findById(  o.getProduct().getId() ).get();
+                int newStock = product.getStock() - o.getAmount();
 
                 InventoryMovements inventoryMovements = InventoryMovements.builder()
                         .date( new Timestamp(System.currentTimeMillis()))
                         .product(product)
                         .type(InventoryMovementType.SALIDA)
-                        .amount( o .getAmount() )
+                        .reason("Venta")
+                        .initialStock( product.getStock() )
+                        .amount( o.getAmount() )
+                        .newStock( newStock )
+                        .exitGuide( exitGuideCreated )
+                        .warehouse( warehouse )
                         .build();
 
-                inventoryMovementsRepository.save( inventoryMovements );
-
-                product.setStock( product.getStock() - o.getAmount() );
+                product.setStock( newStock );
                 productRepository.save( product );
+
+                newInventoryMovementsList.add( inventoryMovements );
             });
+
+            inventoryMovementsRepository.saveAll( newInventoryMovementsList );
 
             orderPreparation.setStatus( PreparationStatus.LISTO_PARA_RECOGER );
             orderPreparation.setCompletedDate(new Timestamp(new Date().getTime()));
@@ -204,12 +229,14 @@ public class OrderPreparationService {
                     .order( order )
                     .preparedBy( grocerUpdated.getUser().getPersonalInformation().getFullName() )
                     .address( order.getShippingAddress() )
+                    .distance( order.getDistance() )
                     .createdDate( new Timestamp(new Date().getTime()))
                     .status(ShippingStatus.PENDIENTE)
                     .build();
 
             OrderShipping orderShippingCreated = orderShippingRepository.save( newOrderShipping );
             order.setOrderShipping( orderShippingCreated );
+            order.setExitGuide( exitGuideCreated );
 
             orderRepository.save( order );
             OrderPreparation orderPreparationUpdated = orderPreparationRepository.save( orderPreparation );

@@ -186,7 +186,7 @@ public class PurchaseOrderReceptionService {
                         .suggestions(acceptAndRejectPurchaseOrderDTO.suggestions())
                         .purchaseOrder(purchaseOrder)
                         .productConditions(acceptAndRejectPurchaseOrderDTO.rejectConditions())
-                        .supplier(purchaseOrder.getSupplier())
+                        .grocer(grocer)
                         .date(new Timestamp(System.currentTimeMillis()))
                         .build();
 
@@ -199,9 +199,9 @@ public class PurchaseOrderReceptionService {
                 EntryGuide newEntryGuide = EntryGuide.builder()
                         .date(new Timestamp(System.currentTimeMillis()))
                         .purchaseOrder(purchaseOrder)
-                        .supplier(purchaseOrder.getSupplier())
                         .productConditions(acceptAndRejectPurchaseOrderDTO.acceptConditions())
-                        .warehouseLocation(warehouse.getLocation())
+                        .warehouse(warehouse)
+                        .grocer(grocer)
                         .build();
 
                 EntryGuide entryGuideCreated = entryGuideRepository.save( newEntryGuide );
@@ -212,17 +212,25 @@ public class PurchaseOrderReceptionService {
                             .amount(pod.getAmount())
                             .date(new Timestamp(System.currentTimeMillis()))
                             .type(InventoryMovementType.ENTRADA)
+                            .reason("Adquisicion")
                             .warehouse(warehouse)
+                            .entryGuide( entryGuideCreated )
                             .build();
                     RawMaterial rawMaterial = pod.getRawMaterial();
                     if( rawMaterial != null ){
+                        int newStock = rawMaterial.getStock() + pod.getAmount();
                         newInventoryMovements.setRawMaterial( rawMaterial );
-                        rawMaterial.setStock( rawMaterial.getStock() + pod.getAmount() );
+                        newInventoryMovements.setInitialStock( rawMaterial.getStock() );
+                        newInventoryMovements.setNewStock( newStock );
+                        rawMaterial.setStock( newStock );
                         rawMaterialRepository.save( rawMaterial );
                     }else{
                         Product product = pod.getProduct();
+                        int newStock = product.getStock() + pod.getAmount();
                         newInventoryMovements.setProduct( product );
-                        product.setStock( product.getStock() + pod.getAmount() );
+                        newInventoryMovements.setInitialStock( product.getStock() );
+                        newInventoryMovements.setNewStock(newStock);
+                        product.setStock( newStock );
                         productRepository.save( product );
                     }
                     newInventoryMovementsList.add( newInventoryMovements );

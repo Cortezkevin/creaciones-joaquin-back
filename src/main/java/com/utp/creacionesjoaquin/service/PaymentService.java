@@ -51,7 +51,6 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final ResourceLoader resourceLoader;
-    private final ProductRepository productRepository;
 
     public ResponseWrapperDTO<String> successPayment(String userId, String note, String specificAddress){
         try {
@@ -65,6 +64,7 @@ public class PaymentService {
                     .paymentMethod(PaymentMethod.TARJETA)
                     .note(note)
                     .specificAddress(specificAddress)
+                    .distance( userCart.getDistance() )
                     .shippingAddress( userAddress.getFullAddress() )
                     .tax( userCart.getTax() )
                     .total( userCart.getTotal() )
@@ -80,21 +80,6 @@ public class PaymentService {
 
             List<OrderDetail> orderDetailList = new ArrayList<>();
             userCart.getCartItems().forEach(cartItem -> {
-                ///
-                /*Product product = productRepository.findById( cartItem.getProduct().getId() ).get();
-
-                InventoryMovements inventoryMovements = InventoryMovements.builder()
-                        .date( new Timestamp(System.currentTimeMillis()))
-                        .product(product)
-                        .type(InventoryMovementType.SALIDA)
-                        .amount( cartItem.getAmount() )
-                        .build();
-
-                inventoryMovementsRepository.save( inventoryMovements );
-
-                product.setStock( product.getStock() - cartItem.getAmount() );
-                productRepository.save( product );*/
-                ///
                 OrderDetail newOrderDetail = OrderDetail.builder()
                         .order( orderCreated )
                         .amount( cartItem.getAmount() )
@@ -122,7 +107,6 @@ public class PaymentService {
             orderCreated.setOrderPreparation(preparationCreated);
             orderRepository.save(orderCreated);
 
-            log.info("CALL GENERATE UPLOAD PDF");
             String invoicePDFUrl = generateAndUploadInvoicePDF( orderCreated.getId() );
 
             Invoice newInvoice = Invoice.builder()
@@ -198,10 +182,8 @@ public class PaymentService {
             Order order = orderRepository.findById( orderId ).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
             Resource jasperResource = resourceLoader.getResource("classpath:orderInvoice.jasper");
             Resource logoResource = resourceLoader.getResource("classpath:static/LOGO.jpeg");
-            log.info("LOADING CLASSPATH FILES");
             InputStream jasperInputStream  = jasperResource.getInputStream();
             InputStream logoInputStream  = logoResource.getInputStream();
-            log.info("CLASSPATH FILES loaded");
             JasperReport report = ( JasperReport ) JRLoader.loadObject(jasperInputStream);
 
             HashMap<String,Object> params = new HashMap<>();

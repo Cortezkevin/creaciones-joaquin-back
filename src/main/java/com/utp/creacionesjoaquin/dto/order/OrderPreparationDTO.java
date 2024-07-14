@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.dto.order;
 
 import com.utp.creacionesjoaquin.dto.grocer.GrocerDTO;
+import com.utp.creacionesjoaquin.enums.OrderStatus;
 import com.utp.creacionesjoaquin.enums.PreparationStatus;
 import com.utp.creacionesjoaquin.model.OrderPreparation;
 
@@ -16,6 +17,7 @@ public record OrderPreparationDTO(
         Timestamp startDate,
         Timestamp preparedDate,
         Timestamp completedDate,
+        OrderStatus orderStatus,
         PreparationStatus status
 ) {
     public static OrderPreparationDTO parseToDTO(OrderPreparation orderPreparation) {
@@ -28,6 +30,7 @@ public record OrderPreparationDTO(
                 orderPreparation.getStartDate(),
                 orderPreparation.getPreparedDate(),
                 orderPreparation.getCompletedDate(),
+                orderPreparation.getOrder().getStatus(),
                 orderPreparation.getStatus()
         );
     }

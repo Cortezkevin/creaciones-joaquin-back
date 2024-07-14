@@ -182,6 +182,7 @@ public class CartService {
         try {
             Cart cart = cartRepository.findById(updateShippingCostDTO.cartId()).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado"));
             cart.setShippingCost( updateShippingCostDTO.shippingCost().setScale(2, RoundingMode.HALF_UP) );
+            cart.setDistance(updateShippingCostDTO.distance());
             cart.calculateTotals();
             System.out.println(cart.getTax());
 

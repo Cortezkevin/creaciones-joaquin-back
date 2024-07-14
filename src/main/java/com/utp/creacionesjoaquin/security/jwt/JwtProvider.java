@@ -43,7 +43,8 @@ public class JwtProvider {
                 .setSubject( mainUser.getUsername() )
                 .setClaims( claims )
                 .setIssuedAt( new Date() )
-                .setExpiration( new Date( new Date().getTime() + ( expiration * 100) ) )
+                .setExpiration( new Date( System.currentTimeMillis() + expiration * 1000L ) )
+                //.setExpiration( new Date( new Date().getTime() + ( expiration * 100) ) )
                 .signWith( key, SignatureAlgorithm.HS256 )
                 .compact();
     }
@@ -61,7 +62,7 @@ public class JwtProvider {
             Jwts.parserBuilder().setSigningKey( key ).build().parseClaimsJws(token);
             return true;
         }catch (MalformedJwtException e) {
-            log.error("token mal formado");
+            log.error("token mal formado: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
             log.error("token no soportado");
         } catch (ExpiredJwtException e) {

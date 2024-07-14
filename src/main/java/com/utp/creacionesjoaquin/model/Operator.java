@@ -2,6 +2,7 @@ package com.utp.creacionesjoaquin.model;
 
 
 import com.utp.creacionesjoaquin.enums.GrocerStatus;
+import com.utp.creacionesjoaquin.enums.OperatorStatus;
 import com.utp.creacionesjoaquin.security.model.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,7 @@ public class Operator {
     private String id;
 
     @Enumerated( EnumType.STRING )
-    private GrocerStatus status;
+    private OperatorStatus status;
 
     @OneToOne(fetch = FetchType.EAGER)
     private User user;

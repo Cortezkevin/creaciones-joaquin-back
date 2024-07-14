@@ -26,6 +26,7 @@ public class Order {
     private String shippingAddress;
     private String specificAddress;
     private BigDecimal shippingCost;
+    private Double distance = 0.0;
     private BigDecimal tax;
     private BigDecimal discount;
     private BigDecimal subtotal;

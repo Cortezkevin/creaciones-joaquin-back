@@ -15,6 +15,7 @@ import com.utp.creacionesjoaquin.repository.OrderShippingRepository;
 import com.utp.creacionesjoaquin.security.model.User;
 import com.utp.creacionesjoaquin.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,8 @@ public class OrderShippingService {
     private final UserRepository userRepository;
 
     public ResponseWrapperDTO<List<OrderShippingDTO>> getAllOrderShipping(){
-        List<OrderShippingDTO> orderShippingDTOList = orderShippingRepository.findAll().stream().map(OrderShippingDTO::parseToDTO).toList();
+        Sort sort = Sort.by( Sort.Direction.DESC, "createdDate" );
+        List<OrderShippingDTO> orderShippingDTOList = orderShippingRepository.findAll(sort).stream().map(OrderShippingDTO::parseToDTO).toList();
         return ResponseWrapperDTO.<List<OrderShippingDTO>>builder()
                 .message("Solicitud satisfactoria")
                 .status(HttpStatus.OK.name())

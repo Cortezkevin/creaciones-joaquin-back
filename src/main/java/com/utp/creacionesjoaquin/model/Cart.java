@@ -22,6 +22,7 @@ public class Cart {
     private BigDecimal discount = BigDecimal.ZERO;
     private BigDecimal subtotal = BigDecimal.ZERO;
     private BigDecimal shippingCost = BigDecimal.ZERO;
+    private Double distance = 0.0;
     private BigDecimal total = BigDecimal.ZERO;
     @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     private List<CartItem> cartItems = new ArrayList<>();

@@ -20,8 +20,11 @@ public class InventoryMovements {
     @Enumerated(EnumType.STRING)
     private InventoryMovementType type;
 
+    private Integer initialStock;
     private Integer amount;
+    private Integer newStock;
     private Timestamp date;
+    private String reason;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Product product;
@@ -31,4 +34,10 @@ public class InventoryMovements {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Warehouse warehouse;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private EntryGuide entryGuide;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private ExitGuide exitGuide;
 }

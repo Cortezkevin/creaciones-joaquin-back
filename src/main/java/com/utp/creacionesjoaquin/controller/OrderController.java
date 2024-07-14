@@ -1,6 +1,7 @@
 package com.utp.creacionesjoaquin.controller;
 
 import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.dto.UpdateDates;
 import com.utp.creacionesjoaquin.dto.order.*;
 import com.utp.creacionesjoaquin.service.OrderPreparationService;
 import com.utp.creacionesjoaquin.service.OrderService;
@@ -69,6 +70,13 @@ public class OrderController {
             @PathVariable String userId
     ){
         return ResponseEntity.ok(orderService.findByUser(userId));
+    }
+
+    @PutMapping("/cancel/{orderId}")
+    public ResponseEntity<ResponseWrapperDTO<OrderDTO>> cancel(
+            @PathVariable String orderId
+    ){
+        return ResponseEntity.ok(orderService.cancelOrder( orderId ));
     }
 
     @GetMapping("/invoice")
@@ -143,4 +151,10 @@ public class OrderController {
         return ResponseEntity.ok( orderPreparationService.checkOrderPreparationCompleted( completedOrderPreparationDTO ) );
     }
 
+    @PostMapping("/dates")
+    public ResponseEntity<String> updateDates(
+            @RequestBody UpdateDates updateDates
+    ){
+        return ResponseEntity.ok(orderService.updateDates(updateDates) );
+    }
 }

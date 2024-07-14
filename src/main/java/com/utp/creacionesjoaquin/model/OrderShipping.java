@@ -19,6 +19,7 @@ public class OrderShipping {
     private String id;
     private String address;
     private String preparedBy;
+    private Double distance = 0.0;
     private Timestamp createdDate;
     private Timestamp startDate;
     private Timestamp preparedDate;

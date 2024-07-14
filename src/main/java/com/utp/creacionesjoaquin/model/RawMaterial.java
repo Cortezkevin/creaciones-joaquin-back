@@ -36,4 +36,7 @@ public class RawMaterial {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Supplier supplier;
+
+    @OneToMany(mappedBy = "rawMaterial", fetch = FetchType.LAZY)
+    private List<ProductMaterials> productRawMaterials = new ArrayList<>();
 }

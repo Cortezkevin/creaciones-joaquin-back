@@ -19,9 +19,11 @@ public class FabricationProduct {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    private Timestamp createdDate;
     private Timestamp startDate;
     private Timestamp endDate;
     private String serieNumber;
+    private Integer amount;
 
     @Enumerated(EnumType.STRING)
     private FabricationStatus status;
@@ -34,13 +36,14 @@ public class FabricationProduct {
     @OneToOne(mappedBy = "fabricationProduct")
     private ExitGuide exitGuide;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    //QUITAR RELACION PORQUE LA ENTIDAD PRODUCTOS YA CUENTA CON UNA RELACION CON LOS MATERIALES
+    /*@ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "fabrication_materials",
             joinColumns = @JoinColumn( name = "fabrication_product_id", nullable = false),
             inverseJoinColumns = @JoinColumn( name = "raw_material_id", nullable = false)
     )
-    private List<RawMaterial> rawMaterials = new ArrayList<>();
+    private List<RawMaterial> rawMaterials = new ArrayList<>();*/
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

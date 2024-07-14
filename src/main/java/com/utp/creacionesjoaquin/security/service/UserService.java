@@ -176,6 +176,80 @@ public class UserService {
         return null;
     }
 
+    public ResponseWrapperDTO<UserDTO> createUser(CreateUserDTO createUserDTO){
+        try {
+            if( repository.existsByEmail(createUserDTO.email()) ) throw new ResourceDuplicatedException(createUserDTO.email() + " ya tiene una cuenta asociada");
+
+            Set<Role> roles = new HashSet<>();
+
+            for(String r: createUserDTO.roles()){
+                Role roleUser = roleRepository.findByRolName( RolName.valueOf( r ) ).orElseThrow(() -> new ResourceNotFoundException("El rol: " + r + " no existe"));
+                roles.add( roleUser );
+            }
+
+            User newUser = User.builder()
+                    .email(createUserDTO.email())
+                    .password(passwordEncoder.encode(createUserDTO.password()))
+                    .roles( roles )
+                    .status(createUserDTO.status())
+                    .build();
+
+            User userCreated = repository.save(newUser);
+
+            Cart newCart = Cart.builder()
+                    .user(userCreated)
+                    .subtotal(BigDecimal.ZERO)
+                    .total(BigDecimal.ZERO)
+                    .shippingCost(BigDecimal.ZERO)
+                    .tax(BigDecimal.ZERO)
+                    .discount(BigDecimal.ZERO)
+                    .build();
+
+            Cart cartCreated = cartRepository.save( newCart );
+
+            Address newAddress = Address.builder()
+                    .urbanization("")
+                    .postalCode(0)
+                    .street("")
+                    .fullAddress("")
+                    .province("")
+                    .district("")
+                    .department("")
+                    .build();
+
+            Address addressCreated = addressRepository.save( newAddress );
+
+            PersonalInformation newPersonalInformation = PersonalInformation.builder()
+                    .firstName(createUserDTO.firstName())
+                    .lastName(createUserDTO.lastName())
+                    .phone("")
+                    .user(userCreated)
+                    .address(addressCreated)
+                    .build();
+
+            PersonalInformation personalInformationCreated = personalInformationRepository.save( newPersonalInformation );
+
+            userCreated.setPersonalInformation( personalInformationCreated );
+            userCreated.setCart( cartCreated );
+
+            User userRecent = repository.save( userCreated );
+
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message("Usuario creado satisfactoriamente")
+                    .status(HttpStatus.OK.name())
+                    .success( true )
+                    .content( UserDTO.parseToDTO( userRecent ) )
+                    .build();
+        }catch (Exception e){
+            return ResponseWrapperDTO.<UserDTO>builder()
+                    .message("Ocurrio un error: " + e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .success( false )
+                    .content( null )
+                    .build();
+        }
+    }
+
     @SneakyThrows
     public ResponseWrapperDTO<JwtTokenDTO> registerUser(NewUserDTO newUserDTO ){
         try {

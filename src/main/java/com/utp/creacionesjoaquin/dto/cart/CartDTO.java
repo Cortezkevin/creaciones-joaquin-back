@@ -11,6 +11,7 @@ public record CartDTO(
         BigDecimal discount,
         BigDecimal subtotal,
         BigDecimal shippingCost,
+        Double distance,
         BigDecimal total,
         List<CartItemDTO> cartItems,
         String user_id
@@ -22,6 +23,7 @@ public record CartDTO(
                 cart.getDiscount(),
                 cart.getSubtotal(),
                 cart.getShippingCost(),
+                cart.getDistance(),
                 cart.getTotal(),
                 cart.getCartItems().stream().map( CartItemDTO::fromEntity ).toList(),
                 cart.getUser().getId()

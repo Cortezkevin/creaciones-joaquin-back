@@ -6,6 +6,7 @@ import com.utp.creacionesjoaquin.dto.collection.CollectionDTO;
 import com.utp.creacionesjoaquin.enums.ProductType;
 import com.utp.creacionesjoaquin.model.Product;
 import com.utp.creacionesjoaquin.model.ProductImages;
+import com.utp.creacionesjoaquin.model.ProductMaterials;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
