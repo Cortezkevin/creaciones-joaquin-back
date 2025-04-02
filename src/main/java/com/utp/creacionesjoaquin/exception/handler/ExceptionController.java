@@ -1,6 +1,6 @@
 package com.utp.creacionesjoaquin.exception.handler;
 
-import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.commons.dto.ResponseWrapperDTO;
 import com.utp.creacionesjoaquin.exception.customException.ResourceDuplicatedException;
 import com.utp.creacionesjoaquin.exception.customException.ResourceNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;

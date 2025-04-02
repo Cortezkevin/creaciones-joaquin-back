@@ -1,7 +1,7 @@
 package com.utp.creacionesjoaquin.security.repository;
 
-import com.utp.creacionesjoaquin.model.Address;
-import com.utp.creacionesjoaquin.model.PersonalInformation;
+import com.utp.creacionesjoaquin.profile.model.Address;
+import com.utp.creacionesjoaquin.profile.model.PersonalInformation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

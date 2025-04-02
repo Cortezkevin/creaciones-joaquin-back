@@ -1,15 +1,13 @@
 package com.utp.creacionesjoaquin.security.controller;
 
-import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.commons.dto.ResponseWrapperDTO;
 import com.utp.creacionesjoaquin.security.dto.*;
-import com.utp.creacionesjoaquin.security.service.UserService;
-import com.utp.creacionesjoaquin.service.EmailService;
+import com.utp.creacionesjoaquin.security.service.AuthService;
+import com.utp.creacionesjoaquin.profile.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,7 +15,7 @@ import java.util.List;
 public class AuthController {
 
     @Autowired
-    private UserService userService;
+    private AuthService authService;
 
     @Autowired
     private EmailService emailService;
@@ -27,22 +25,22 @@ public class AuthController {
     public ResponseEntity<ResponseWrapperDTO<UserDTO>> getUserFromToken(@RequestHeader(name = "Authorization") String tokenHeader){
         System.out.println();
         String token = tokenHeader.length() > 7 ? tokenHeader.substring(7) : "no token";
-        return ResponseEntity.ok( userService.getUserFromToken(token) );
+        return ResponseEntity.ok( authService.getUserFromToken(token) );
     }
 
     @PostMapping("/roles")
     public ResponseEntity<ResponseWrapperDTO<String>> createRoles(){
-        return ResponseEntity.ok( userService.createRoles() );
+        return ResponseEntity.ok( authService.createRoles() );
     }
 
     @PostMapping("/login")
     public ResponseEntity<ResponseWrapperDTO<JwtTokenDTO>> loginUser(@Valid @RequestBody LoginUserDTO loginUserDTO){
-        return ResponseEntity.ok( userService.loginUser(loginUserDTO) );
+        return ResponseEntity.ok( authService.loginUser(loginUserDTO) );
     }
 
     @PostMapping("/register")
     public ResponseEntity<ResponseWrapperDTO<JwtTokenDTO>> registerUser(@RequestBody NewUserDTO newUserDTO){
-        return ResponseEntity.ok( userService.registerUser(newUserDTO) );
+        return ResponseEntity.ok( authService.registerUser(newUserDTO) );
     }
 
     @GetMapping("/sendConfirmationEmail")
@@ -52,7 +50,7 @@ public class AuthController {
 
     @PutMapping("/changePassword")
     public ResponseEntity<ResponseWrapperDTO<String>> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
-        return ResponseEntity.ok( userService.changePassword(changePasswordDTO) );
+        return ResponseEntity.ok( authService.changePassword(changePasswordDTO) );
     }
 
 

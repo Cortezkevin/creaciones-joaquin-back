@@ -1,7 +1,12 @@
 package com.utp.creacionesjoaquin.security.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.utp.creacionesjoaquin.model.*;
+import com.utp.creacionesjoaquin.sales.model.Cart;
+import com.utp.creacionesjoaquin.order.model.Order;
+import com.utp.creacionesjoaquin.profile.model.PersonalInformation;
+import com.utp.creacionesjoaquin.purchase.model.PurchaseOrder;
+import com.utp.creacionesjoaquin.warehouse.model.Carrier;
+import com.utp.creacionesjoaquin.warehouse.model.Grocer;
 import com.utp.creacionesjoaquin.security.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;

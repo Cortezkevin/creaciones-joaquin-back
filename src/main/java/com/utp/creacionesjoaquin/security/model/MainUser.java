@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @Setter
 @AllArgsConstructor
 public class MainUser implements UserDetails {
-    /*private String firstName;
-    private String lastName;*/
     private String username;
     private String email;
     private String password;
@@ -28,8 +26,6 @@ public class MainUser implements UserDetails {
 
     public static MainUser build( User user ){
         return new MainUser(
-                /*user.getPersonalInformation().getFirstName(),
-                user.getPersonalInformation().getLastName(),*/
                 user.getEmail(),
                 user.getEmail(),
                 user.getPassword(),

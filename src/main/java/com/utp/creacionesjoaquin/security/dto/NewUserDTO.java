@@ -1,7 +1,7 @@
 package com.utp.creacionesjoaquin.security.dto;
 
-import com.utp.creacionesjoaquin.dto.address.MemoryAddressDTO;
-import com.utp.creacionesjoaquin.dto.cart.MemoryCartDTO;
+import com.utp.creacionesjoaquin.profile.dto.address.MemoryAddressDTO;
+import com.utp.creacionesjoaquin.sales.dto.cart.MemoryCartDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 

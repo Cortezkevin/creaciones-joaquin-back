@@ -1,9 +1,9 @@
 package com.utp.creacionesjoaquin.security.dto;
 
-import com.utp.creacionesjoaquin.dto.address.AddressDTO;
-import com.utp.creacionesjoaquin.dto.carrier.CarrierDTO;
-import com.utp.creacionesjoaquin.dto.grocer.GrocerDTO;
-import com.utp.creacionesjoaquin.model.PersonalInformation;
+import com.utp.creacionesjoaquin.profile.dto.address.AddressDTO;
+import com.utp.creacionesjoaquin.warehouse.dto.carrier.CarrierDTO;
+import com.utp.creacionesjoaquin.warehouse.dto.grocer.GrocerDTO;
+import com.utp.creacionesjoaquin.profile.model.PersonalInformation;
 import com.utp.creacionesjoaquin.security.enums.RolName;
 import com.utp.creacionesjoaquin.security.enums.Status;
 import com.utp.creacionesjoaquin.security.model.MainUser;

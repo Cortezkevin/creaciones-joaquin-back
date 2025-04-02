@@ -1,7 +1,7 @@
 package com.utp.creacionesjoaquin.security.service;
 
-import com.utp.creacionesjoaquin.dto.ResponseWrapperDTO;
-import com.utp.creacionesjoaquin.dto.RoleDTO;
+import com.utp.creacionesjoaquin.commons.dto.ResponseWrapperDTO;
+import com.utp.creacionesjoaquin.commons.dto.RoleDTO;
 import com.utp.creacionesjoaquin.security.enums.RolName;
 import com.utp.creacionesjoaquin.security.model.Role;
 import com.utp.creacionesjoaquin.security.repository.RoleRepository;
